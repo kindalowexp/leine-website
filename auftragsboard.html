@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Auftragsboard Elektro Brandt</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: App-Shell. Seitenleiste links, oben Kennzahlen, darunter Kanban mit Drag-and-drop, rechts Detailansicht mit Einsatzfoto, unten API-Protokoll */
+:root {
+  --bg: #eef1f5; --panel: #ffffff; --col: #e4e9ef; --ink: #17222d; --muted: #5b6977; --line: #d3dbe3;
+  --side: #121c26; --side-ink: #c9d5e0; --side-active: #1f2f3d;
+  --volt: #f2b705; --volt-ink: #17222d; --blue: #2d6cb5; --amber: #c27c0e; --green: #2c8a4f; --red: #c03b3b;
+  --log-bg: #0e171f; --log-ink: #c6d8e5;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0f151b; --panel: #18212a; --col: #131b22; --ink: #e2e9ef; --muted: #91a1b0; --line: #283541; --side: #0a1015; --side-ink: #b9c7d3; --side-active: #18242f; --blue: #69a4e6; --amber: #e3a640; --green: #5cc283; --red: #e57575; --log-bg: #080d11; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0f151b; --panel: #18212a; --col: #131b22; --ink: #e2e9ef; --muted: #91a1b0; --line: #283541; --side: #0a1015; --side-ink: #b9c7d3; --side-active: #18242f; --blue: #69a4e6; --amber: #e3a640; --green: #5cc283; --red: #e57575; --log-bg: #080d11; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 0.95rem/1.5 var(--sans); }
+button { font: 600 0.88rem/1 var(--sans); border-radius: 8px; padding: 9px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+button.primary { background: var(--volt); border-color: var(--volt); color: var(--volt-ink); }
+button:focus-visible, input:focus-visible, select:focus-visible, .card:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.demo-flag { background: var(--volt); color: var(--volt-ink); font-size: 0.85rem; text-align: center; padding: 6px 16px; font-weight: 500; }
+.demo-flag a { color: inherit; }
+
+.app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: calc(100vh - 32px); }
+.side { background: var(--side); color: var(--side-ink); padding: 22px 14px; display: flex; flex-direction: column; gap: 26px; }
+.logo { display: flex; align-items: center; gap: 10px; padding: 0 8px; font: 700 1.05rem/1.1 var(--sans); color: #fff; }
+.logo i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--volt); color: var(--volt-ink); font-style: normal; }
+.logo i svg { width: 18px; height: 18px; }
+.logo small { display: block; font: 400 0.75rem/1.3 var(--sans); color: var(--side-ink); opacity: .7; }
+.side nav { display: grid; gap: 2px; }
+.side nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--side-ink); text-decoration: none; font-weight: 500; }
+.side nav a.on { background: var(--side-active); color: #fff; }
+.side nav a .n { margin-left: auto; font: 600 0.72rem/1 var(--mono); background: var(--volt); color: var(--volt-ink); padding: 3px 6px; border-radius: 5px; }
+.side nav svg { width: 18px; height: 18px; opacity: .85; }
+.side .crew { margin-top: auto; display: grid; gap: 10px; padding: 0 8px; font-size: 0.85rem; }
+.side .crew h4 { margin: 0; font: 600 0.7rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; opacity: .6; }
+.side .crew div { display: flex; align-items: center; gap: 10px; }
+.side .crew .st { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.side .crew .st.busy { background: var(--amber); }
+
+.av { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font: 600 0.72rem/1 var(--sans); color: #fff; flex: none; }
+.av.tm { background: #2d6cb5; } .av.ak { background: #8a4fb5; } .av.js { background: #2c8a4f; }
+
+.main { padding: 22px clamp(16px, 3vw, 32px) 32px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.top h1 { margin: 0; font-size: 1.5rem; }
+.top p { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 4px; }
+.kpi small { color: var(--muted); font-size: 0.8rem; }
+.kpi b { font: 600 1.55rem/1.1 var(--mono); font-variant-numeric: tabular-nums; }
+.kpi .bar { height: 5px; border-radius: 3px; background: var(--col); overflow: hidden; margin-top: 6px; }
+.kpi .bar i { display: block; height: 100%; background: var(--green); border-radius: 3px; transition: width .4s; }
+.kpi.warn b { color: var(--amber); }
+
+form.add { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: 2fr 1.4fr 0.6fr 0.9fr 0.9fr auto; gap: 10px; align-items: end; }
+label { display: grid; gap: 4px; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.col { background: var(--col); border-radius: 12px; padding: 10px; display: grid; gap: 8px; align-content: start; min-height: 260px; border: 2px dashed transparent; transition: border-color .15s; }
+.col.over { border-color: var(--blue); }
+.col h2 { font: 600 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 4px 4px 6px; display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.col h2::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+.col[data-s="arbeit"] h2::before { background: var(--amber); }
+.col[data-s="fertig"] h2::before { background: var(--green); }
+.col h2 span:last-child { margin-left: auto; background: var(--panel); padding: 3px 7px; border-radius: 5px; color: var(--ink); }
+.card { min-width: 0; overflow-wrap: anywhere; background: var(--panel); border-radius: 10px; padding: 12px; display: grid; gap: 8px; border: 1px solid var(--line); cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,.05); transition: transform .12s, box-shadow .12s; }
+.card:hover { transform: translateY(-1px); box-shadow: 0 6px 16px -8px rgba(0,0,0,.25); }
+.card.sel { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue); }
+.card.drag { opacity: .4; }
+.card .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; font-size: 0.8rem; color: var(--muted); }
+.card .id { font: 500 0.75rem/1 var(--mono); color: var(--muted); }
+.card .t { font-weight: 600; line-height: 1.3; }
+.card .row .av { width: 22px; height: 22px; font-size: 0.62rem; margin-left: auto; }
+.pill { font: 600 0.66rem/1 var(--mono); padding: 4px 6px; border-radius: 4px; letter-spacing: .04em; }
+.pill.dring { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
+.pill.sent { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); }
+.pill.cat { background: var(--col); color: var(--muted); }
+.empty { font-size: 0.85rem; color: var(--muted); padding: 18px 6px; text-align: center; }
+
+.detail { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; position: sticky; top: 16px; }
+.photo { aspect-ratio: 16 / 10; max-width: 100%; position: relative; background: var(--img, repeating-linear-gradient(135deg, rgba(242,183,5,.16) 0 14px, transparent 14px 28px), linear-gradient(150deg, #2a3a48, #121c26)); background-size: cover; background-position: center; }
+.photo::after { content: attr(data-label); position: absolute; left: 12px; bottom: 10px; font: 500 0.68rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.8); }
+.photo.has-img::after { content: none; }
+.photo svg { position: absolute; inset: 0; margin: auto; width: 54px; height: 54px; color: var(--volt); opacity: .8; }
+.photo.has-img svg { display: none; }
+.detail .body { padding: 16px; display: grid; gap: 12px; }
+.detail h3 { margin: 0; font-size: 1.1rem; line-height: 1.3; }
+.detail dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 0.88rem; }
+.detail dt { color: var(--muted); }
+.detail dd { margin: 0; font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.detail .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.detail .acts button { flex: 1; }
+.detail .acts .pill { align-self: center; padding: 8px; }
+
+.log { background: var(--log-bg); color: var(--log-ink); border-radius: 12px; padding: 14px 16px; font: 400 0.8rem/1.6 var(--mono); max-height: 300px; overflow: auto; }
+.log h2 { font: 600 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px; color: #8fb3c9; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.log h2 button { padding: 5px 9px; font-size: 0.7rem; background: transparent; color: #8fb3c9; border-color: #2b3d4b; }
+.log pre { margin: 0 0 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.log .ok { color: #7fd69c; }
+.log .k { color: #f2c94c; }
+.foot { color: var(--muted); font-size: 0.82rem; margin: 0; }
+
+@media (max-width: 1340px) { .work { grid-template-columns: 1fr; } .detail { position: static; display: grid; grid-template-columns: 220px 1fr; } .detail .photo { aspect-ratio: auto; min-height: 100%; } }
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .side { flex-direction: row; align-items: center; padding: 12px 16px; gap: 14px; overflow-x: auto; }
+  .side nav { display: flex; gap: 4px; }
+  .side nav a { padding: 8px 10px; white-space: nowrap; }
+  .side nav a:not(.on) .lbl { display: none; }
+  .side .crew, .logo small { display: none; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+  form.add { grid-template-columns: 1fr 1fr; } form.add .wide { grid-column: 1 / -1; }
+}
+@media (max-width: 680px) { .board { grid-template-columns: 1fr; } .detail { grid-template-columns: 1fr; } .detail .photo { aspect-ratio: 16 / 9; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="demo-flag">Portfolio-Demo von Leinecode. Der Betrieb ist ausgedacht. <a href="index.html">Zurück zur Übersicht</a></div>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><i><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></i><div>Elektro Brandt<small>Hannover-List</small></div></div>
+    <nav aria-label="Bereiche">
+      <a href="#" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span class="lbl">Aufträge</span><span class="n" id="nav-n">0</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="lbl">Kalender</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-4-5.5"/></svg><span class="lbl">Kunden</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/></svg><span class="lbl">Rechnungen</span></a>
+    </nav>
+    <div class="crew"><h4>Heute im Einsatz</h4>
+      <div><span class="av tm">TM</span>Tim Meyer<span class="st busy" title="Im Einsatz"></span></div>
+      <div><span class="av ak">AK</span>Anna Kowalski<span class="st busy" title="Im Einsatz"></span></div>
+      <div><span class="av js">JS</span>Jonas Schulz<span class="st" title="Verfügbar"></span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div><h1>Aufträge</h1><p id="today"></p></div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <form class="add" id="add">
+      <label class="wide" for="f-titel">Neuer Auftrag<input id="f-titel" placeholder="z. B. Steckdosen Küche erneuern" required></label>
+      <label for="f-kunde">Kunde<input id="f-kunde" placeholder="Name oder Firma" required></label>
+      <label for="f-std">Std.<input id="f-std" type="number" min="0.5" step="0.5" value="2"></label>
+      <label for="f-mont">Monteur<select id="f-mont"><option value="tm">Tim Meyer</option><option value="ak">Anna Kowalski</option><option value="js">Jonas Schulz</option></select></label>
+      <label for="f-prio">Priorität<select id="f-prio"><option value="normal">Normal</option><option value="dringend">Dringend</option></select></label>
+      <button class="primary" type="submit">Anlegen</button>
+    </form>
+
+    <div class="work">
+      <div class="board" id="board"></div>
+      <aside class="detail" id="detail" aria-live="polite"></aside>
+    </div>
+
+    <div class="log">
+      <h2><span>Schnittstelle · Buchhaltung</span><button type="button" id="reset">Demo zurücksetzen</button></h2>
+      <div id="log"></div>
+    </div>
+    <p class="foot">Karten per Drag-and-drop verschieben oder in der Detailansicht weiterschalten. Erledigte Aufträge gehen als Rechnungsentwurf per <code>POST /api/rechnungen</code> an die Buchhaltung (z. B. lexoffice oder sevDesk). In dieser Demo wird die Anfrage simuliert, die Daten bleiben in Ihrem Browser.</p>
+  </main>
+</div>
+
+<script>
+/* Einsatzfotos: Schlüssel aus "foto" je Auftrag, dazu Bildausschnitt */
+var PHOTOS = {
+  messen: ["img/elektro-messen.jpg", "30% 50%"], verteiler: ["img/elektro-verteiler.jpg", "50% 52%"],
+  monteur: ["img/elektro-monteur.jpg", "50% 45%"], schuetze: ["img/elektro-schuetze.jpg", "50% 40%"]
+};
+var STUNDENSATZ = 68, KEY = "auftragsboard-demo-v3";
+var COLS = [["offen", "Offen"], ["arbeit", "In Arbeit"], ["fertig", "Fertig"]];
+var CREW = { tm: "Tim Meyer", ak: "Anna Kowalski", js: "Jonas Schulz" };
+var SAMPLE = [
+  { id: 1041, titel: "Zählerschrank prüfen (E-Check)", kunde: "Bäckerei Ahrens", ort: "Lister Meile 00", std: 3, prio: "normal", s: "offen", m: "js", kat: "Prüfung", foto: "messen" },
+  { id: 1042, titel: "Wallbox 11 kW installieren", kunde: "Fam. Yilmaz", ort: "Podbielskistraße 00", std: 5, prio: "normal", s: "offen", m: "tm", kat: "E-Mobilität", foto: "monteur" },
+  { id: 1044, titel: "Außenbeleuchtung Hof", kunde: "Kita Sonnenblume", ort: "Wedekindplatz 00", std: 2.5, prio: "normal", s: "offen", m: "ak", kat: "Beleuchtung", foto: "schuetze" },
+  { id: 1043, titel: "Stromausfall Küche", kunde: "Café Lister Meile", ort: "Lister Meile 00", std: 1.5, prio: "dringend", s: "arbeit", m: "ak", kat: "Störung", foto: "monteur" },
+  { id: 1045, titel: "Unterverteilung Neubau", kunde: "Bau GmbH Nord", ort: "Vahrenwalder Str. 00", std: 8, prio: "normal", s: "arbeit", m: "tm", kat: "Installation", foto: "verteiler" },
+  { id: 1039, titel: "LED-Umrüstung Büro", kunde: "Kanzlei Weber", ort: "Sedanstraße 00", std: 6, prio: "normal", s: "fertig", m: "js", kat: "Beleuchtung", sent: true, foto: "schuetze" },
+  { id: 1040, titel: "Rauchmelder Mietshaus", kunde: "Hausverwaltung Nord", ort: "Bödekerstraße 00", std: 4, prio: "normal", s: "fertig", m: "ak", kat: "Sicherheit", foto: "verteiler" }
+];
+var data, logs = [], selected = 1043;
+function load() { try { var raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {} return JSON.parse(JSON.stringify(SAMPLE)); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+function euro(n) { return n.toLocaleString("de-DE", { style: "currency", currency: "EUR" }); }
+function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function av(code) { var a = el("span", "av " + code, code.toUpperCase()); a.title = CREW[code]; return a; }
+function byId(id) { return data.filter(function (a) { return a.id === id; })[0]; }
+function move(a, s) { a.s = s; save(); render(); }
+
+function render() {
+  var board = document.getElementById("board"); board.innerHTML = "";
+  COLS.forEach(function (c) {
+    var items = data.filter(function (a) { return a.s === c[0]; });
+    items.sort(function (x, y) { return (y.prio === "dringend") - (x.prio === "dringend"); });
+    var col = el("section", "col"); col.dataset.s = c[0]; col.setAttribute("aria-label", c[1]);
+    var h = el("h2"); h.append(el("span", null, c[1]), el("span", null, String(items.length))); col.appendChild(h);
+    col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("over"); });
+    col.addEventListener("dragleave", function () { col.classList.remove("over"); });
+    col.addEventListener("drop", function (e) { e.preventDefault(); col.classList.remove("over"); var a = byId(+e.dataTransfer.getData("text/plain")); if (a) { selected = a.id; move(a, c[0]); } });
+    if (!items.length) col.appendChild(el("div", "empty", "Hierher ziehen"));
+    items.forEach(function (a) {
+      var card = el("article", "card" + (a.id === selected ? " sel" : "")); card.draggable = true; card.tabIndex = 0;
+      card.addEventListener("dragstart", function (e) { e.dataTransfer.setData("text/plain", a.id); card.classList.add("drag"); });
+      card.addEventListener("dragend", function () { card.classList.remove("drag"); });
+      card.addEventListener("click", function () { selected = a.id; render(); });
+      card.addEventListener("keydown", function (e) { if (e.key === "Enter") { selected = a.id; render(); } });
+      var r1 = el("div", "row"); r1.append(el("span", "id", "#" + a.id), el("span", "pill cat", a.kat || "Auftrag"));
+      if (a.prio === "dringend") r1.appendChild(el("span", "pill dring", "DRINGEND"));
+      if (a.sent) r1.appendChild(el("span", "pill sent", "ABGERECHNET"));
+      card.appendChild(r1);
+      card.appendChild(el("div", "t", a.titel));
+      var r2 = el("div", "row"); r2.append(el("span", null, a.kunde + " · " + a.std + " Std."), av(a.m)); card.appendChild(r2);
+      col.appendChild(card);
+    });
+    board.appendChild(col);
+  });
+  renderDetail(); renderKpis(); renderLog();
+}
+function renderDetail() {
+  var d = document.getElementById("detail"), a = byId(selected); d.innerHTML = "";
+  if (!a) { d.appendChild(el("div", "body", "Wählen Sie einen Auftrag aus.")); return; }
+  var ph = el("div", "photo"); ph.dataset.label = "Einsatzfoto · " + (a.kat || "Auftrag");
+  var src = PHOTOS[a.foto]; if (src) { ph.style.setProperty("--img", "url('" + src[0] + "')"); ph.style.backgroundPosition = src[1]; ph.classList.add("has-img"); }
+  ph.innerHTML += '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>';
+  var body = el("div", "body");
+  body.appendChild(el("span", "id", "#" + a.id + " · " + COLS.filter(function (c) { return c[0] === a.s; })[0][1]));
+  body.appendChild(el("h3", null, a.titel));
+  var dl = el("dl");
+  [["Kunde", a.kunde], ["Adresse", (a.ort || "–") + ", Hannover"], ["Monteur", CREW[a.m]], ["Aufwand", a.std + " Std. à " + STUNDENSATZ + " €"], ["Betrag netto", euro(a.std * STUNDENSATZ)]]
+    .forEach(function (x) { dl.append(el("dt", null, x[0]), el("dd", null, x[1])); });
+  body.appendChild(dl);
+  var acts = el("div", "acts"), i = COLS.map(function (c) { return c[0]; }).indexOf(a.s);
+  if (i > 0) { var b = el("button", null, "← " + COLS[i - 1][1]); b.type = "button"; b.onclick = function () { move(a, COLS[i - 1][0]); }; acts.appendChild(b); }
+  if (i < 2) { var f = el("button", "primary", COLS[i + 1][1] + " →"); f.type = "button"; f.onclick = function () { move(a, COLS[i + 1][0]); }; acts.appendChild(f); }
+  if (i === 2 && !a.sent) { var s = el("button", "primary", "Rechnung an Buchhaltung"); s.type = "button"; s.onclick = function () { sendInvoice(a); }; acts.appendChild(s); }
+  if (i === 2 && a.sent) acts.appendChild(el("span", "pill sent", "RECHNUNGSENTWURF ÜBERTRAGEN"));
+  body.appendChild(acts);
+  d.append(ph, body);
+}
+function renderKpis() {
+  var open = data.filter(function (a) { return a.s !== "fertig"; }), done = data.filter(function (a) { return a.s === "fertig"; });
+  var unbilled = done.filter(function (a) { return !a.sent; }).reduce(function (s, a) { return s + a.std * STUNDENSATZ; }, 0);
+  var billed = done.filter(function (a) { return a.sent; }).length, quote = done.length ? Math.round(billed / done.length * 100) : 0;
+  var k = document.getElementById("kpis"); k.innerHTML = "";
+  [["Offene Aufträge", String(open.length), ""], ["Dringend", String(data.filter(function (a) { return a.prio === "dringend" && a.s !== "fertig"; }).length), "warn"],
+   ["Noch abzurechnen", euro(unbilled), unbilled ? "warn" : ""], ["Abgerechnet", quote + " %", "", quote]]
+    .forEach(function (x) {
+      var t = el("div", "kpi " + x[2]); t.append(el("small", null, x[0]), el("b", null, x[1]));
+      if (x[3] != null) { var bar = el("div", "bar"), i = el("i"); i.style.width = x[3] + "%"; bar.appendChild(i); t.appendChild(bar); }
+      k.appendChild(t);
+    });
+  document.getElementById("nav-n").textContent = open.length;
+}
+function sendInvoice(a) {
+  var payload = { auftrag: a.id, kunde: a.kunde, leistungsort: a.ort + ", Hannover", positionen: [{ text: a.titel, menge: a.std, einheit: "Std.", einzelpreis: STUNDENSATZ }], summe_netto: a.std * STUNDENSATZ, status: "entwurf" };
+  var t = new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  logs.unshift({ req: t + "  POST /api/rechnungen\n" + JSON.stringify(payload, null, 2), res: "201 Created · Rechnungsentwurf RE-2026-" + (300 + a.id % 100) + " angelegt" });
+  a.sent = true; save(); render();
+}
+function renderLog() {
+  var l = document.getElementById("log"); l.innerHTML = "";
+  if (!logs.length) { l.appendChild(el("pre", null, "Noch keine Übertragung. Wählen Sie einen fertigen Auftrag und klicken Sie auf „Rechnung an Buchhaltung“.")); return; }
+  logs.forEach(function (x) { l.appendChild(el("pre", null, x.req)); l.appendChild(el("pre", "ok", "← " + x.res)); });
+}
+document.getElementById("add").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var t = document.getElementById("f-titel"), k = document.getElementById("f-kunde");
+  if (!t.value.trim() || !k.value.trim()) { (t.value.trim() ? k : t).focus(); return; }
+  var id = data.reduce(function (m, a) { return Math.max(m, a.id); }, 1000) + 1;
+  data.push({ id: id, titel: t.value.trim(), kunde: k.value.trim(), ort: "Adresse folgt", std: parseFloat(document.getElementById("f-std").value) || 1, prio: document.getElementById("f-prio").value, s: "offen", m: document.getElementById("f-mont").value, kat: "Neu", foto: "messen" });
+  selected = id; t.value = ""; k.value = ""; save(); render();
+});
+document.getElementById("reset").onclick = function () { data = JSON.parse(JSON.stringify(SAMPLE)); logs = []; selected = 1043; save(); render(); };
+document.getElementById("today").textContent = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + " · Stundensatz " + STUNDENSATZ + " €";
+data = load(); if (!byId(selected) && data[0]) selected = data[0].id; render();
+</script>
+</body>
+</html>

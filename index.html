@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Leinecode Hannover</title>
+<meta name="description" content="Webseiten, Apps und Schnittstellen für kleine Betriebe in Hannover. Persönlich vor Ort, zu festen Paketpreisen.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: eine ruhige Spalte mit breiten Bändern; Hero zeigt echten Code, Leistungen als Preisliste, Portfolio als zwei große Fälle */
+:root {
+  --paper: #f5f6f3;
+  --surface: #ffffff;
+  --ink: #15232a;
+  --muted: #56656b;
+  --line: #d9dfdc;
+  --teal: #1d6b67;
+  --teal-soft: #e2efed;
+  --ochre: #b9821a;
+  --band: #15232a;
+  --band-ink: #eef3f1;
+  --code-bg: #0f1b20;
+  --code-ink: #cfe3df;
+  --code-key: #f0c062;
+  --code-str: #8fd3c8;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10191d; --surface: #172328; --ink: #e7eeec; --muted: #9db0b0; --line: #2a3a3f;
+    --teal: #5fbcb3; --teal-soft: #1b3336; --ochre: #e3b04f; --band: #0a1215; --band-ink: #e7eeec;
+    --code-bg: #0a1215; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10191d; --surface: #172328; --ink: #e7eeec; --muted: #9db0b0; --line: #2a3a3f;
+  --teal: #5fbcb3; --teal-soft: #1b3336; --ochre: #e3b04f; --band: #0a1215; --band-ink: #e7eeec;
+  --code-bg: #0a1215; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.6 var(--body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.1; text-wrap: balance; margin: 0; }
+h2 { font-size: clamp(1.75rem, 3.5vw, 2.5rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.25rem; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--teal); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid var(--ochre); outline-offset: 2px; }
+.eyebrow { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); }
+
+/* Kopf */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; flex-wrap: wrap; }
+.logo { font: 800 1.35rem/1 var(--display); color: var(--ink); text-decoration: none; display: flex; align-items: baseline; gap: 2px; }
+.logo span { color: var(--teal); }
+nav { display: flex; gap: 20px; flex-wrap: wrap; }
+nav a { color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.98rem; }
+nav a:hover { color: var(--teal); }
+
+/* Hero */
+.hero .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; padding-block: 64px 72px; }
+.hero h1 { font-size: clamp(2.3rem, 5.4vw, 4rem); font-weight: 800; letter-spacing: -0.02em; margin-block: 16px 20px; }
+.hero h1 em { font-style: normal; color: var(--teal); }
+.hero .lead { font-size: 1.2rem; color: var(--muted); max-width: 34em; }
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 6px; font: 600 1rem/1 var(--body); text-decoration: none; border: 2px solid var(--teal); cursor: pointer; }
+.btn.primary { background: var(--teal); color: var(--paper); }
+.btn.ghost { color: var(--teal); background: transparent; }
+.btn:hover { filter: brightness(1.08); }
+.facts { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 36px; font-size: 0.95rem; color: var(--muted); }
+.facts b { display: block; font: 700 1.3rem/1.2 var(--display); color: var(--ink); }
+.code { background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 22px; font: 400 0.86rem/1.65 var(--mono); overflow-x: auto; min-width: 0; box-shadow: 0 20px 40px -24px rgba(10, 20, 24, 0.55); }
+.code .c { color: #6f8a8a; }
+.code .k { color: var(--code-key); }
+.code .s { color: var(--code-str); }
+.code pre { margin: 0; }
+.code .bar { display: flex; gap: 6px; margin-bottom: 14px; }
+.code .bar i { width: 10px; height: 10px; border-radius: 50%; background: #2e4148; display: block; }
+
+section { padding-block: 72px; }
+.section-head { display: grid; gap: 12px; margin-bottom: 36px; max-width: 46em; }
+.section-head p { color: var(--muted); font-size: 1.1rem; }
+
+/* Leistungen als Preisliste */
+.price-list { border-top: 2px solid var(--ink); }
+.price-row { display: grid; grid-template-columns: 1.1fr 1.6fr 11rem; gap: 24px; padding-block: 22px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.price-row p { color: var(--muted); min-width: 0; }
+.price { font: 500 1rem/1.3 var(--mono); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.note { margin-top: 16px; font-size: 0.92rem; color: var(--muted); }
+
+/* Portfolio */
+.cases { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.case { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+.case .shot { aspect-ratio: 16 / 10; max-width: 100%; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+.case .body { padding: 24px; display: grid; gap: 12px; flex: 1; align-content: start; }
+.case .body p { color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font: 500 0.75rem/1 var(--mono); padding: 6px 8px; border-radius: 4px; background: var(--teal-soft); color: var(--teal); }
+.case .links { margin-top: auto; padding: 0 24px 24px; }
+/* Mini-Vorschauen */
+.shot-salon { background: #f3ece4; display: grid; grid-template-columns: 1fr 1fr; }
+.shot-salon .l { padding: 22px; display: grid; align-content: center; gap: 10px; }
+.shot-salon .l b { font: 700 1.3rem/1.1 Georgia, serif; color: #3b2a22; }
+.shot-salon .l i { display: block; height: 8px; background: #d8c8b8; border-radius: 4px; }
+.shot-salon .l i:nth-child(3) { width: 70%; }
+.shot-salon .l u { display: inline-block; width: 90px; height: 26px; background: #a3532f; border-radius: 13px; }
+.shot-salon .r { background: #e6d8ca; padding: 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; align-content: center; }
+.shot-salon .r span { height: 22px; border-radius: 4px; background: #fffaf4; }
+.shot-salon .r span.on { background: #a3532f; }
+.shot-board { background: #eef1f4; padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.shot-board .col { background: #dde3e9; border-radius: 6px; padding: 8px; display: grid; gap: 6px; align-content: start; }
+.shot-board .col b { font: 600 0.7rem/1 var(--mono); color: #33424f; }
+.shot-board .col span { height: 30px; background: #fff; border-radius: 4px; border-left: 3px solid #2f6db3; }
+.shot-board .col span.w { border-left-color: #d08a12; }
+.shot-board .col span.d { border-left-color: #2f8a4e; }
+
+/* Ablauf */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; counter-reset: s; }
+.step { border-top: 2px solid var(--teal); padding-top: 16px; display: grid; gap: 8px; }
+.step::before { counter-increment: s; content: "Schritt " counter(s); font: 500 0.75rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); }
+.step p { color: var(--muted); }
+
+/* Über mich + Region */
+.band { background: var(--band); color: var(--band-ink); }
+.band .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.band p { color: color-mix(in srgb, var(--band-ink) 78%, transparent); }
+.band .eyebrow { color: var(--ochre); }
+.band h2 { margin-block: 12px 16px; }
+.districts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.districts span { border: 1px solid color-mix(in srgb, var(--band-ink) 30%, transparent); border-radius: 999px; padding: 4px 12px; font-size: 0.92rem; }
+.stack { font: 400 0.92rem/1.9 var(--mono); }
+
+/* Kontakt */
+.contact { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 48px; }
+.contact dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; margin: 24px 0 0; }
+.contact dt { font: 500 0.8rem/1.6 var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.contact dd { margin: 0; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 24px; display: grid; gap: 16px; }
+label { display: grid; gap: 6px; font-weight: 600; font-size: 0.95rem; }
+input, textarea, select { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); width: 100%; }
+textarea { min-height: 120px; resize: vertical; }
+.form-msg { font-size: 0.95rem; color: var(--teal); }
+
+footer { border-top: 1px solid var(--line); }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 28px; color: var(--muted); font-size: 0.92rem; }
+footer a { color: var(--muted); }
+
+@media (max-width: 860px) {
+  .hero .wrap, .band .wrap, .contact, .cases { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .price-row { grid-template-columns: 1fr; gap: 6px; }
+  .price { text-align: left; }
+}
+@media (max-width: 520px) {
+  .steps { grid-template-columns: 1fr; }
+  nav { gap: 14px; }
+  section { padding-block: 52px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1, .hero .lead, .hero .code { animation: rise 0.6s ease-out both; }
+  .hero .lead { animation-delay: 0.08s; }
+  .hero .code { animation-delay: 0.16s; }
+  @keyframes rise { from { transform: translateY(10px); } to { transform: none; } }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#start">Leine<span>code</span></a>
+    <nav aria-label="Hauptnavigation">
+      <a href="#leistungen">Leistungen</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#ablauf">Ablauf</a>
+      <a href="#kontakt">Kontakt</a>
+    </nav>
+  </div>
+</header>
+
+<main id="start">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Webentwicklung aus Hannover</span>
+        <h1>Webseiten und Apps, <em>die mit Ihrer Software reden.</em></h1>
+        <p class="lead">Ich baue Webseiten, Web-Apps und Schnittstellen für kleine Betriebe in Hannover und der Region. Persönlich vor Ort, zu festen Paketpreisen und ohne Agentur-Overhead.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="#kontakt">Kostenloses Erstgespräch</a>
+          <a class="btn ghost" href="#portfolio">Projekte ansehen</a>
+        </div>
+        <div class="facts">
+          <div><b>ab 990 €</b>Website-Paket</div>
+          <div><b>50 € / Std.</b>App-Entwicklung</div>
+          <div><b>vor Ort</b>Stadt und Region Hannover</div>
+        </div>
+      </div>
+      <div class="code" aria-label="Beispiel einer Schnittstelle: Online-Termin landet im Kalender">
+        <div class="bar"><i></i><i></i><i></i></div>
+<pre><span class="c">// Online-Termin landet direkt im Kalender</span>
+<span class="k">app</span>.post(<span class="s">"/api/termine"</span>, <span class="k">async</span> (req, res) =&gt; {
+  <span class="k">const</span> termin = pruefe(req.body);
+  <span class="k">await</span> kalender.eintragen(termin);
+  <span class="k">await</span> mail.bestaetigung(termin.kunde);
+  res.status(<span class="s">201</span>).json(termin);
+});</pre>
+      </div>
+    </div>
+  </div>
+
+  <section id="leistungen">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Leistungen und Preise</span>
+        <h2>Alles aus einer Hand, vom ersten Entwurf bis zur Wartung</h2>
+        <p>Feste Pakete für Webseiten, klare Stundensätze für Apps. Sie wissen vorher, was es kostet.</p>
+      </div>
+      <div class="price-list">
+        <div class="price-row">
+          <h3>Website-Paket</h3>
+          <p>Responsive Website mit 5 bis 8 Seiten, Kontaktformular, Google-Unternehmensprofil, Impressum und Datenschutz.</p>
+          <span class="price">990 – 2.500 €</span>
+        </div>
+        <div class="price-row">
+          <h3>Schnittstellen</h3>
+          <p>Onlineshop mit Warenwirtschaft verbinden, Terminbuchung mit Kalender, Formulare direkt ins CRM.</p>
+          <span class="price">1.500 – 5.000 €</span>
+        </div>
+        <div class="price-row">
+          <h3>Web- und Mobile-Apps</h3>
+          <p>Kundenportale, interne Werkzeuge, einfache Apps für iOS und Android.</p>
+          <span class="price">50 € / Std.</span>
+        </div>
+        <div class="price-row">
+          <h3>Wartung und Hosting</h3>
+          <p>Updates, Backups, Sicherheit und kleine Änderungen, ohne dass Sie sich kümmern müssen.</p>
+          <span class="price">29 – 69 € / Monat</span>
+        </div>
+      </div>
+      <p class="note">Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</p>
+    </div>
+  </section>
+
+  <section id="portfolio" style="padding-top: 0">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Portfolio</span>
+        <h2>Zwei Projekte zum Ausprobieren</h2>
+        <p>Beide Demos laufen im Browser. Klicken Sie sich durch, so wie es Ihre Kunden später tun würden.</p>
+      </div>
+      <div class="cases">
+        <article class="case">
+          <div class="shot shot-salon" aria-hidden="true">
+            <div class="l"><b>Salon Schnittpunkt</b><i></i><i></i><u></u></div>
+            <div class="r"><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="body">
+            <span class="eyebrow">Website mit Terminbuchung</span>
+            <h3>Salon Schnittpunkt, Linden</h3>
+            <p>Website für einen Friseursalon mit Online-Terminbuchung. Kundinnen wählen Leistung, Tag und freie Uhrzeit. Der Termin geht als Anfrage an den Salon.</p>
+            <div class="tags"><span class="tag">HTML/CSS</span><span class="tag">JavaScript</span><span class="tag">Terminlogik</span><span class="tag">Mobile First</span></div>
+          </div>
+          <div class="links"><a class="btn ghost" href="salon-schnittpunkt.html">Demo öffnen</a></div>
+        </article>
+        <article class="case">
+          <div class="shot shot-board" aria-hidden="true">
+            <div class="col"><b>OFFEN</b><span></span><span></span></div>
+            <div class="col"><b>IN ARBEIT</b><span class="w"></span></div>
+            <div class="col"><b>FERTIG</b><span class="d"></span><span class="d"></span></div>
+          </div>
+          <div class="body">
+            <span class="eyebrow">Web-App mit Schnittstelle</span>
+            <h3>Auftragsboard Elektro Brandt</h3>
+            <p>Internes Werkzeug für einen Elektrobetrieb. Aufträge wandern von „Offen“ bis „Fertig“. Erledigte Aufträge gehen per Schnittstelle als Rechnungsentwurf an die Buchhaltung.</p>
+            <div class="tags"><span class="tag">JavaScript</span><span class="tag">REST/JSON</span><span class="tag">Offline-Speicher</span><span class="tag">Kanban</span></div>
+          </div>
+          <div class="links"><a class="btn ghost" href="auftragsboard.html">Demo öffnen</a></div>
+        </article>
+      </div>
+      <p class="note">Beide Betriebe sind ausgedachte Beispiele, die Projekte selbst sind echt programmiert.</p>
+    </div>
+  </section>
+
+  <section id="ablauf" style="padding-top: 0">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">So arbeiten wir zusammen</span>
+        <h2>Vom Gespräch zur fertigen Seite in vier Schritten</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><h3>Erstgespräch</h3><p>Kostenlos, bei Ihnen im Betrieb oder per Video. Wir klären, was Sie brauchen.</p></div>
+        <div class="step"><h3>Festpreis-Angebot</h3><p>Sie bekommen ein schriftliches Angebot mit Umfang, Preis und Termin.</p></div>
+        <div class="step"><h3>Umsetzung</h3><p>Sie sehen den Fortschritt laufend in einer Vorschau und geben Feedback.</p></div>
+        <div class="step"><h3>Übergabe</h3><p>Einweisung, Livegang und auf Wunsch Wartung, damit alles sicher bleibt.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="ueber-mich">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Über mich</span>
+        <h2>Ein Ansprechpartner, der Ihren Betrieb kennt</h2>
+        <p>Ich bin Daniel Wolthausen, ausgebildeter Fullstack-Entwickler aus Hannover. Ich arbeite allein und direkt mit Ihnen, ohne Weitergabe an Subunternehmer. Moderne Werkzeuge machen mich schnell, und davon profitieren Sie beim Preis.</p>
+        <div class="districts" aria-label="Einsatzgebiet">
+          <span>Linden</span><span>List</span><span>Südstadt</span><span>Nordstadt</span><span>Langenhagen</span><span>Garbsen</span><span>Laatzen</span><span>Region Hannover</span>
+        </div>
+      </div>
+      <div>
+        <span class="eyebrow">Technik</span>
+        <h2>Womit ich baue</h2>
+        <p class="stack">HTML · CSS · JavaScript · TypeScript<br>React · Node.js · Express<br>SQL · REST-APIs · JSON<br>Git · GitHub · Hosting und Domains</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="kontakt">
+    <div class="wrap contact">
+      <div>
+        <span class="eyebrow">Kontakt</span>
+        <h2 style="margin-top: 12px">Erzählen Sie mir von Ihrem Projekt</h2>
+        <p style="color: var(--muted); margin-top: 12px">Ich melde mich innerhalb von einem Werktag zurück.</p>
+        <dl>
+          <dt>E-Mail</dt><dd><a href="mailto:leinecode@gmx.de">leinecode@gmx.de</a></dd>
+          <dt>Ort</dt><dd>Hannover-Ricklingen</dd>
+        </dl>
+      </div>
+      <form id="kontaktform" novalidate>
+        <label for="k-name">Name<input id="k-name" name="name" autocomplete="name" required></label>
+        <label for="k-mail">E-Mail<input id="k-mail" name="email" type="email" autocomplete="email" required></label>
+        <label for="k-art">Worum geht es?
+          <select id="k-art" name="art">
+            <option>Neue Website</option>
+            <option>Schnittstelle / Anbindung</option>
+            <option>App oder internes Werkzeug</option>
+            <option>Wartung einer bestehenden Seite</option>
+          </select>
+        </label>
+        <label for="k-text">Nachricht<textarea id="k-text" name="nachricht" required></textarea></label>
+        <button class="btn primary" type="submit">Anfrage senden</button>
+        <p class="form-msg" id="k-msg" role="status"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Leinecode · Daniel Wolthausen · Hannover-Ricklingen</span>
+    <span><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></span>
+  </div>
+</footer>
+
+<script>
+document.getElementById("kontaktform").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var msg = document.getElementById("k-msg");
+  if (!this.checkValidity()) { msg.textContent = "Bitte füllen Sie Name, E-Mail und Nachricht aus."; return; }
+  msg.textContent = "Das Formular ist noch nicht freigeschaltet. Bitte schreiben Sie mir direkt an leinecode@gmx.de.";
+});
+</script>
+</body>
+</html>

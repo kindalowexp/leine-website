@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Impressum · Leinecode</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root { --paper: #f5f6f3; --ink: #15232a; --muted: #56656b; --line: #d9dfdc; --teal: #1d6b67; --ochre: #b9821a;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #10191d; --ink: #e7eeec; --muted: #9db0b0; --line: #2a3a3f; --teal: #5fbcb3; --ochre: #e3b04f; color-scheme: dark; } }
+:root[data-theme="dark"] { --paper: #10191d; --ink: #e7eeec; --muted: #9db0b0; --line: #2a3a3f; --teal: #5fbcb3; --ochre: #e3b04f; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.65 var(--body); }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 16px; flex-wrap: wrap; }
+.logo { font: 800 1.3rem/1 var(--display); color: var(--ink); text-decoration: none; }
+.logo span { color: var(--teal); }
+a { color: var(--teal); }
+a:focus-visible { outline: 3px solid var(--ochre); outline-offset: 2px; }
+main { padding-block: 48px 72px; }
+h1, h2 { font-family: var(--display); line-height: 1.15; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 5vw, 2.8rem); margin: 0 0 28px; }
+h2 { font-size: 1.3rem; margin: 40px 0 10px; }
+h3 { font-size: 1.05rem; margin: 24px 0 6px; }
+p, ul { margin: 0 0 12px; overflow-wrap: anywhere; }
+.muted { color: var(--muted); font-size: 0.95rem; }
+footer .wrap { border-top: 1px solid var(--line); padding-block: 24px; color: var(--muted); font-size: 0.92rem; display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<header><div class="wrap"><a class="logo" href="index.html">Leine<span>code</span></a><a href="index.html">Zur Startseite</a></div></header>
+<main class="wrap">
+<h1>Impressum</h1>
+<h2>Angaben gemäß § 5 DDG</h2>
+<p>Daniel Wolthausen<br>Leinecode, Webentwicklung<br>Friedrich-Ebert-Platz 14<br>30459 Hannover</p>
+<h2>Kontakt</h2>
+<p>E-Mail: leinecode@gmx.de</p>
+<h2>Umsatzsteuer</h2>
+<p>Kleinunternehmer gemäß § 19 UStG. Es wird keine Umsatzsteuer berechnet.</p>
+<h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
+<p>Daniel Wolthausen<br>Friedrich-Ebert-Platz 14<br>30459 Hannover</p>
+<h2>Verbraucherstreitbeilegung</h2>
+<p>Ich bin nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+<h2>Haftung für Inhalte und Links</h2>
+<p>Ich erstelle die Inhalte dieser Website mit Sorgfalt, übernehme aber keine Gewähr für ihre Richtigkeit, Vollständigkeit und Aktualität. Für Inhalte externer Websites, auf die ich verlinke, sind deren Betreiber verantwortlich. Zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße erkennbar. Werden mir Rechtsverletzungen bekannt, entferne ich die betreffenden Links umgehend.</p>
+<h2>Bildnachweise</h2>
+<p>Fotos in den Portfolio-Demos: Unsplash (Unsplash-Lizenz), u. a. von Baylee Gramling, Josh Marty, Lindsay Cash, Adam Winger, Agustin Fernandez, Farhad Ibrahimzade, Toolmash Expo, Markus Spiske, Colsan Ltda und Mostafa Mahmoudi.</p>
+</main>
+<footer><div class="wrap"><span>© 2026 Leinecode · Daniel Wolthausen · Hannover-Ricklingen</span><span><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></span></div></footer>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salon Schnittpunkt Linden</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: Magazin-Look. Großes Hero-Foto mit schwebender Terminkarte, Preisliste wie eine Salon-Karte, Buchung als eigener Block */
+:root {
+  --bg: #f5ede4; --card: #fffaf4; --ink: #2e211b; --muted: #7a6458; --line: #e2d2c2;
+  --rust: #a24e2b; --rust-dark: #7e3a1f; --rust-ink: #fffaf4; --soft: #ecdccc; --off: #d6c4b2; --sage: #6f7d62;
+  --photo-a: #c58b62; --photo-b: #5b3a2a;
+  --serif: "Fraunces", Georgia, serif; --sans: "Karla", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #1c1512; --card: #271e19; --ink: #f3e7db; --muted: #bea797; --line: #3d2f27; --rust: #db7d52; --rust-dark: #f09a72; --rust-ink: #1c1512; --soft: #33271f; --off: #4b3b31; --sage: #a5b391; --photo-a: #8a5a3c; --photo-b: #2a1b14; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #1c1512; --card: #271e19; --ink: #f3e7db; --muted: #bea797; --line: #3d2f27; --rust: #db7d52; --rust-dark: #f09a72; --rust-ink: #1c1512; --soft: #33271f; --off: #4b3b31; --sage: #a5b391; --photo-a: #8a5a3c; --photo-b: #2a1b14; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 1.05rem/1.6 var(--sans); }
+.wrap { max-width: 1140px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.05; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(2rem, 4.5vw, 3rem); }
+h2 em, h1 em { font-style: italic; font-weight: 500; color: var(--rust); }
+p { margin: 0; }
+.kicker { font: 700 0.78rem/1 var(--sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sage); }
+.btn { display: inline-flex; align-items: center; gap: 8px; background: var(--rust); color: var(--rust-ink); border: 0; padding: 14px 24px; border-radius: 999px; font: 700 1rem/1 var(--sans); cursor: pointer; text-decoration: none; transition: background .2s; }
+.btn:hover { background: var(--rust-dark); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.line { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--rust); outline-offset: 3px; }
+
+/* Fotos: echtes Bild über --img, sonst gestalteter Platzhalter */
+.photo { position: relative; overflow: hidden; border-radius: 18px; background:
+  var(--img, radial-gradient(120% 90% at 20% 15%, var(--photo-a), transparent 60%), radial-gradient(80% 80% at 85% 90%, var(--rust), transparent 65%), linear-gradient(160deg, var(--photo-a), var(--photo-b))); background-size: cover; background-position: center; max-width: 100%; }
+.photo::after { content: attr(data-label); position: absolute; left: 14px; bottom: 12px; font: 500 0.72rem/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,250,244,.85); }
+.photo.has-img::after { content: none; }
+.photo .mark { position: absolute; inset: 0; display: grid; place-items: center; font: italic 500 clamp(3rem, 9vw, 6rem)/1 var(--serif); color: rgba(255,250,244,.18); pointer-events: none; }
+.photo.has-img .mark { display: none; }
+
+.demo-flag { background: var(--ink); color: var(--bg); font-size: 0.85rem; text-align: center; padding: 7px 16px; }
+.demo-flag a { color: inherit; }
+header .wrap { display: flex; justify-content: space-between; align-items: center; padding-block: 20px; gap: 12px; flex-wrap: wrap; }
+.brand { font: 700 1.4rem/1 var(--serif); display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+.brand svg { width: 30px; height: 30px; color: var(--rust); }
+header nav { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+header nav a:not(.btn) { color: var(--ink); text-decoration: none; font-weight: 500; }
+
+.hero .wrap { display: grid; grid-template-columns: 1fr 1.05fr; gap: 56px; align-items: center; padding-block: 24px 80px; }
+.hero h1 { font-size: clamp(2.8rem, 7vw, 5.2rem); letter-spacing: -0.02em; margin-block: 18px 22px; }
+.hero .lead { color: var(--muted); font-size: 1.2rem; max-width: 30em; }
+.hero .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.rating { display: flex; align-items: center; gap: 12px; margin-top: 34px; font-size: 0.95rem; color: var(--muted); }
+.stars { color: #d9a13b; letter-spacing: 2px; font-size: 1.1rem; }
+.rating b { color: var(--ink); font-size: 1.1rem; }
+.hero-visual { position: relative; }
+.hero-visual .photo { aspect-ratio: 4 / 5; }
+.float { position: absolute; left: -28px; bottom: 36px; background: var(--card); border-radius: 14px; padding: 16px 18px; box-shadow: 0 24px 50px -20px rgba(46,33,27,.45); display: grid; gap: 4px; min-width: 0; max-width: 240px; }
+.float small { color: var(--muted); font-size: 0.82rem; }
+.float b { font: 700 1.3rem/1.1 var(--serif); }
+.float .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--sage); margin-right: 6px; animation: pulse 2s infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+
+.strip { border-block: 1px solid var(--line); }
+.strip .wrap { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding-block: 18px; font: 500 0.95rem/1.3 var(--sans); color: var(--muted); }
+.strip b { color: var(--ink); }
+
+section { padding-block: 88px; }
+.head { display: grid; gap: 14px; margin-bottom: 44px; max-width: 40em; }
+.head p { color: var(--muted); font-size: 1.1rem; }
+
+.services { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: start; }
+.services .photo { aspect-ratio: 5 / 6; position: sticky; top: 24px; }
+.menu-group + .menu-group { margin-top: 36px; }
+.menu-group h3 { font-size: 1.5rem; margin-bottom: 8px; }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.item b { font-weight: 700; }
+.item .p { font: 700 1.1rem/1.4 var(--serif); font-variant-numeric: tabular-nums; }
+.item small { color: var(--muted); grid-column: 1 / -1; font-size: 0.92rem; }
+
+.team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.member { display: grid; gap: 12px; }
+.member .photo { aspect-ratio: 3 / 4; border-radius: 999px 999px 18px 18px; }
+.member h3 { font-size: 1.35rem; }
+.member p { color: var(--muted); font-size: 0.95rem; }
+
+.booking { background: var(--ink); color: var(--bg); }
+.booking .head p { color: color-mix(in srgb, var(--bg) 70%, transparent); }
+.booking .kicker { color: #d9a13b; }
+.booking h2 em { color: #e79b74; }
+.book { background: var(--card); color: var(--ink); border-radius: 22px; padding: clamp(18px, 4vw, 36px); display: grid; grid-template-columns: 1.3fr 0.9fr; gap: 36px; }
+.steps { display: grid; gap: 26px; min-width: 0; }
+.step h3 { font: 700 0.8rem/1 var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+.step h3 span { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--soft); color: var(--ink); font-size: 0.78rem; letter-spacing: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chip { border: 1.5px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 9px 15px; font: 500 0.95rem/1 var(--sans); cursor: pointer; transition: border-color .15s, background .15s; }
+.chip:hover:not([disabled]) { border-color: var(--rust); }
+.chip[aria-pressed="true"] { background: var(--rust); color: var(--rust-ink); border-color: var(--rust); }
+.chip[disabled] { color: var(--off); text-decoration: line-through; cursor: not-allowed; border-style: dashed; }
+.days { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.day { border: 1.5px solid var(--line); background: transparent; color: var(--ink); border-radius: 14px; padding: 10px 4px; font: 700 1.15rem/1.1 var(--serif); cursor: pointer; text-align: center; }
+.day small { display: block; font: 500 0.72rem/1.4 var(--sans); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.day[aria-pressed="true"] { background: var(--rust); color: var(--rust-ink); border-color: var(--rust); }
+.day[aria-pressed="true"] small { color: inherit; }
+.ticket { background: var(--bg); border-radius: 16px; padding: 22px; display: grid; gap: 14px; align-content: start; border: 1.5px dashed var(--off); min-width: 0; }
+.ticket h3 { font-size: 1.5rem; }
+.ticket dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 0; font-size: 0.95rem; }
+.ticket dt { color: var(--muted); }
+.ticket dd { margin: 0; font-weight: 700; text-align: right; }
+.ticket .total { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 12px; font: 700 1.4rem/1 var(--serif); }
+.ticket label { display: grid; gap: 4px; font-size: 0.85rem; font-weight: 700; }
+input { font: inherit; padding: 11px 13px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); width: 100%; }
+.ok { background: color-mix(in srgb, var(--sage) 18%, transparent); border-radius: 12px; padding: 14px; display: grid; gap: 4px; font-size: 0.95rem; }
+
+.reviews { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.review { background: var(--card); border-radius: 18px; padding: 26px; display: grid; gap: 14px; align-content: start; }
+.review p { font: italic 500 1.12rem/1.5 var(--serif); }
+.review small { color: var(--muted); }
+
+.gallery { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 220px 220px; gap: 14px; }
+.gallery .photo:first-child { grid-row: span 2; }
+
+.visit .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+.hours { display: grid; grid-template-columns: auto 1fr; gap: 10px 28px; margin-top: 20px; font-variant-numeric: tabular-nums; font-size: 1.1rem; }
+.hours .today { color: var(--rust); font-weight: 700; }
+.map { border-radius: 18px; background: var(--soft); position: relative; overflow: hidden; min-height: 280px; }
+.map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+footer .wrap { padding-block: 32px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+footer a { color: var(--muted); }
+.mobile-cta { display: none; }
+
+@media (max-width: 900px) {
+  .hero .wrap, .services, .book, .visit .wrap { grid-template-columns: 1fr; }
+  .hero-visual .photo { aspect-ratio: 4 / 3; }
+  .float { left: 12px; bottom: 12px; }
+  .services .photo { position: static; aspect-ratio: 16 / 9; }
+  .reviews { grid-template-columns: 1fr; }
+  .gallery { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 140px 140px; }
+  .gallery .photo:first-child { grid-column: span 2; grid-row: auto; }
+  header nav a:not(.btn) { display: none; }
+  section { padding-block: 64px; }
+}
+@media (max-width: 600px) {
+  .team { grid-template-columns: 1fr 1fr; }
+  .team .member:last-child { display: none; }
+  .days { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mobile-cta { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--card); border-top: 1px solid var(--line); }
+  .mobile-cta .btn { flex: 1; justify-content: center; }
+  footer .wrap { padding-bottom: 96px; }
+}
+@media (prefers-reduced-motion: reduce) { .float .dot { animation: none; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="demo-flag">Portfolio-Demo von Leinecode. Der Salon ist ausgedacht. <a href="index.html">Zurück zur Übersicht</a></div>
+
+<header><div class="wrap">
+  <a class="brand" href="#top"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="23" r="5"/><circle cx="23" cy="23" r="5"/><path d="M12.5 19.5 26 4M19.5 19.5 6 4"/></svg>Schnittpunkt</a>
+  <nav aria-label="Navigation">
+    <a href="#leistungen">Leistungen</a><a href="#team">Team</a><a href="#besuch">Anfahrt</a>
+    <a class="btn" href="#buchen">Termin buchen</a>
+  </nav>
+</div></header>
+
+<main id="top">
+  <div class="hero"><div class="wrap">
+    <div>
+      <span class="kicker">Friseur in Hannover-Linden</span>
+      <h1>Gute Schnitte. <em>Ohne Warteschlange.</em></h1>
+      <p class="lead">Damen, Herren und Kinder, mitten auf der Limmerstraße. Ihren Termin buchen Sie online in einer Minute, rund um die Uhr.</p>
+      <div class="cta"><a class="btn" href="#buchen">Freien Termin finden</a><a class="btn line" href="#leistungen">Preise ansehen</a></div>
+      <div class="rating"><span class="stars" aria-hidden="true">★★★★★</span><span><b>4,9</b> aus 212 Google-Bewertungen</span></div>
+    </div>
+    <div class="hero-visual">
+      <div class="photo" data-photo="salon-1" data-label="Foto · Salon innen" role="img" aria-label="Friseurin legt Locken mit dem Lockenstab"></div>
+      <div class="float"><small><span class="dot"></span>Nächster freier Termin</small><b id="next-free">Morgen, 10:30</b><small>Damenschnitt bei Mira</small></div>
+    </div>
+  </div></div>
+
+  <div class="strip"><div class="wrap">
+    <span><b>Di–Fr</b> 9–18:30 · <b>Sa</b> 9–14 Uhr</span>
+    <span>Linie 10 · Haltestelle <b>Ungerstraße</b></span>
+    <span>Kartenzahlung und <b>Gutscheine</b></span>
+  </div></div>
+
+  <section id="leistungen"><div class="wrap services">
+    <div class="photo" data-photo="salon-2" data-label="Foto · Haarschnitt nah" role="img" aria-label="Nasser Haarschnitt mit Schere und Kamm"></div>
+    <div>
+      <div class="head"><span class="kicker">Leistungen und Preise</span><h2>Ehrliche Preise, <em>keine Überraschungen.</em></h2></div>
+      <div class="menu-group"><h3>Schneiden</h3>
+        <div class="item"><b>Damenschnitt mit Waschen und Föhnen</b><span class="p">46 €</span><small>ca. 60 Minuten</small></div>
+        <div class="item"><b>Herrenschnitt</b><span class="p">28 €</span><small>ca. 30 Minuten, inklusive Waschen</small></div>
+        <div class="item"><b>Kinderschnitt bis 12 Jahre</b><span class="p">18 €</span><small>ca. 30 Minuten</small></div>
+      </div>
+      <div class="menu-group"><h3>Farbe und Pflege</h3>
+        <div class="item"><b>Ansatzfarbe</b><span class="p">ab 55 €</span><small>ca. 90 Minuten, Preis je nach Haarlänge</small></div>
+        <div class="item"><b>Strähnen, Balayage</b><span class="p">ab 89 €</span><small>ca. 2,5 Stunden, vorher kurze Beratung</small></div>
+        <div class="item"><b>Bart trimmen und konturieren</b><span class="p">14 €</span><small>ca. 15 Minuten</small></div>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="team" style="padding-top:0"><div class="wrap">
+    <div class="head"><span class="kicker">Team</span><h2>Drei Menschen, <em>eine Leidenschaft.</em></h2></div>
+    <div class="team">
+      <div class="member"><div class="photo" data-photo="team-1" data-label="Foto · Mira"></div><h3>Mira</h3><p>Inhaberin, Meisterin seit 2014. Spezialistin für Farbe und Balayage.</p></div>
+      <div class="member"><div class="photo" data-photo="team-2" data-label="Foto · Deniz"></div><h3>Deniz</h3><p>Herrenschnitte, Fades und Bärte. Schnell, präzise, gut gelaunt.</p></div>
+      <div class="member"><div class="photo" data-photo="team-3" data-label="Foto · Jule"></div><h3>Jule</h3><p>Kinder, Locken und alles, was Geduld braucht.</p></div>
+    </div>
+  </div></section>
+
+  <section class="booking" id="buchen"><div class="wrap">
+    <div class="head"><span class="kicker">Online-Termin</span><h2>In vier Schritten <em>zum Wunschtermin.</em></h2><p>Grau durchgestrichene Zeiten sind schon vergeben. Sie bekommen eine Bestätigung per SMS.</p></div>
+    <div class="book">
+      <div class="steps">
+        <div class="step"><h3><span>1</span>Leistung</h3><div class="chips" id="services"></div></div>
+        <div class="step"><h3><span>2</span>Bei wem?</h3><div class="chips" id="staff"></div></div>
+        <div class="step"><h3><span>3</span>Tag</h3><div class="days" id="days"></div></div>
+        <div class="step"><h3><span>4</span>Uhrzeit</h3><div class="chips" id="slots"></div></div>
+      </div>
+      <aside class="ticket" aria-label="Ihre Buchung">
+        <h3>Ihr Termin</h3>
+        <dl><dt>Leistung</dt><dd id="t-service"></dd><dt>Bei</dt><dd id="t-staff"></dd><dt>Datum</dt><dd id="t-day"></dd><dt>Uhrzeit</dt><dd id="t-time"></dd><dt>Dauer</dt><dd id="t-min"></dd></dl>
+        <div class="total"><span>Preis</span><span id="t-price"></span></div>
+        <label for="b-name">Name<input id="b-name" autocomplete="name" value="Lena Krüger"></label>
+        <label for="b-tel">Handy für die SMS<input id="b-tel" type="tel" autocomplete="tel" value="0176 1234567"></label>
+        <button class="btn" id="send" type="button" style="justify-content:center">Verbindlich buchen</button>
+        <div id="result" hidden></div>
+      </aside>
+    </div>
+  </div></section>
+
+  <section><div class="wrap">
+    <div class="head"><span class="kicker">Bewertungen</span><h2>Was unsere Kundschaft <em>sagt.</em></h2></div>
+    <div class="reviews">
+      <article class="review"><span class="stars" aria-label="5 Sterne">★★★★★</span><p>„Endlich ein Salon, bei dem ich abends um elf noch einen Termin buchen kann. Und der Schnitt sitzt.“</p><small>Sarah M. · Google</small></article>
+      <article class="review"><span class="stars" aria-label="5 Sterne">★★★★★</span><p>„Deniz macht den saubersten Fade in Linden. Rein, raus, 25 Minuten.“</p><small>Tobias K. · Google</small></article>
+      <article class="review"><span class="stars" aria-label="5 Sterne">★★★★★</span><p>„Meine Tochter hatte Angst vorm Friseur. Bei Jule wollte sie gar nicht mehr gehen.“</p><small>Aylin D. · Google</small></article>
+    </div>
+  </div></section>
+
+  <section style="padding-top:0"><div class="wrap gallery">
+    <div class="photo" data-photo="g1" data-label="Foto · Werkzeug"></div>
+    <div class="photo" data-photo="g2" data-label="Foto · Salon"></div>
+    <div class="photo" data-photo="g3" data-label="Foto · Schnitt"></div>
+    <div class="photo" data-photo="g4" data-label="Foto · Farbe"></div>
+    <div class="photo" data-photo="g5" data-label="Foto · Details"></div>
+  </div></section>
+
+  <section class="visit" id="besuch" style="padding-top:0"><div class="wrap">
+    <div>
+      <span class="kicker">Besuch</span>
+      <h2 style="margin-top:14px">Limmerstraße, <em>mitten in Linden.</em></h2>
+      <div class="hours" id="hours"></div>
+      <p style="margin-top:22px;color:var(--muted)">Limmerstraße 00, 30451 Hannover<br>Linie 10, Haltestelle Ungerstraße, 2 Minuten zu Fuß</p>
+    </div>
+    <div class="map" role="img" aria-label="Kartenskizze: Salon an der Limmerstraße nahe Haltestelle Ungerstraße">
+      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <path d="M-10 170 L410 120" stroke="var(--card)" stroke-width="22" fill="none"/>
+        <path d="M-10 170 L410 120" stroke="var(--rust)" stroke-width="2" stroke-dasharray="8 8" fill="none" opacity=".5"/>
+        <path d="M150 -10 L190 310" stroke="var(--card)" stroke-width="12" fill="none"/>
+        <path d="M300 -10 L280 310" stroke="var(--card)" stroke-width="10" fill="none"/>
+        <path d="M-10 60 Q120 40 210 70 T410 40" stroke="var(--off)" stroke-width="30" fill="none" opacity=".6"/>
+        <text x="16" y="200" font-family="Karla, sans-serif" font-size="12" fill="var(--muted)">Limmerstraße</text>
+        <text x="12" y="52" font-family="Karla, sans-serif" font-size="12" fill="var(--muted)">Ihme</text>
+        <circle cx="300" cy="129" r="7" fill="var(--sage)"/><text x="312" y="152" font-family="Karla, sans-serif" font-size="12" fill="var(--ink)">Ungerstraße</text>
+        <circle cx="230" cy="138" r="16" fill="var(--rust)"/><circle cx="230" cy="138" r="6" fill="var(--card)"/>
+        <text x="190" y="176" font-family="Fraunces, serif" font-weight="700" font-size="15" fill="var(--ink)">Schnittpunkt</text>
+      </svg>
+    </div>
+  </div></section>
+</main>
+
+<div class="mobile-cta"><a class="btn" href="#buchen">Termin buchen</a></div>
+<footer><div class="wrap"><span>Salon Schnittpunkt · Beispielprojekt</span><span>Website und Buchung: <a href="index.html">Leinecode</a></span></div></footer>
+
+<script>
+/* Eigene Fotos: hier Dateinamen eintragen, z. B. "salon-1": "img/salon-innen.jpg" */
+var PHOTOS = {
+  "salon-1": ["img/salon-locken.jpg", "50% 40%"], "salon-2": ["img/salon-schnitt.jpg", "50% 60%"],
+  "team-1": ["img/salon-waschen.jpg", "45% 50%"], "team-2": ["img/salon-fade.jpg", "50% 40%"], "team-3": ["img/salon-schere.jpg", "40% 35%"],
+  "g1": ["img/salon-werkzeug.jpg", "50% 85%"], "g2": ["img/salon-waschen.jpg", "50% 50%"], "g3": ["img/salon-fade.jpg", "50% 45%"],
+  "g4": ["img/salon-schnitt.jpg", "50% 55%"], "g5": ["img/salon-locken.jpg", "50% 55%"]
+};
+document.querySelectorAll("[data-photo]").forEach(function (el) {
+  var ph = PHOTOS[el.dataset.photo]; if (!ph) return;
+  el.style.setProperty("--img", "url('" + ph[0] + "')"); el.style.backgroundPosition = ph[1]; el.classList.add("has-img");
+});
+
+var SERVICES = [
+  { name: "Damenschnitt", min: 60, price: 46 }, { name: "Herrenschnitt", min: 30, price: 28 },
+  { name: "Kinderschnitt", min: 30, price: 18 }, { name: "Ansatzfarbe", min: 90, price: 55 }, { name: "Bart", min: 15, price: 14 }
+];
+var STAFF = ["Egal, wer frei ist", "Mira", "Deniz", "Jule"];
+var WD = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"], WDL = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+var state = { service: SERVICES[0], staff: 0, day: null, slot: null };
+
+function nextDays() { var out = [], d = new Date(); d.setHours(0, 0, 0, 0); while (out.length < 6) { d.setDate(d.getDate() + 1); if (d.getDay() > 1) out.push(new Date(d)); } return out; }
+function seeded(n) { var x = Math.sin(n) * 10000; return x - Math.floor(x); }
+function slotsFor(day, minutes, staff) {
+  var close = day.getDay() === 6 ? 840 : 1110, list = [];
+  for (var t = 540; t + minutes <= close; t += 30) list.push({ t: t, taken: seeded(day.getDate() * 97 + t + staff * 13) < (staff ? 0.5 : 0.35) });
+  return list;
+}
+function hm(t) { return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); }
+function fmtDay(d) { return WD[d.getDay()] + ", " + d.getDate() + "." + (d.getMonth() + 1) + "."; }
+function chip(label, pressed, onClick, disabled) {
+  var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = label;
+  b.setAttribute("aria-pressed", pressed); if (disabled) { b.disabled = true; b.title = "Schon vergeben"; } b.onclick = onClick; return b;
+}
+function render() {
+  var s = document.getElementById("services"); s.innerHTML = "";
+  SERVICES.forEach(function (sv) { s.appendChild(chip(sv.name, sv === state.service, function () { state.service = sv; state.slot = null; render(); })); });
+  var st = document.getElementById("staff"); st.innerHTML = "";
+  STAFF.forEach(function (n, i) { st.appendChild(chip(n, i === state.staff, function () { state.staff = i; state.slot = null; render(); })); });
+  var d = document.getElementById("days"); d.innerHTML = "";
+  nextDays().forEach(function (day) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "day";
+    b.innerHTML = "<small>" + WD[day.getDay()] + "</small>" + day.getDate() + "." + (day.getMonth() + 1) + ".";
+    b.setAttribute("aria-pressed", !!state.day && state.day.getTime() === day.getTime());
+    b.onclick = function () { state.day = day; state.slot = null; render(); }; d.appendChild(b);
+  });
+  var sl = document.getElementById("slots"); sl.innerHTML = "";
+  slotsFor(state.day, state.service.min, state.staff).forEach(function (x) { sl.appendChild(chip(hm(x.t), state.slot === x.t, function () { state.slot = x.t; render(); }, x.taken)); });
+  document.getElementById("t-service").textContent = state.service.name;
+  document.getElementById("t-staff").textContent = state.staff ? STAFF[state.staff] : "Wer frei ist";
+  document.getElementById("t-day").textContent = fmtDay(state.day);
+  document.getElementById("t-time").textContent = state.slot != null ? hm(state.slot) + " Uhr" : "bitte wählen";
+  document.getElementById("t-min").textContent = state.service.min + " Min.";
+  document.getElementById("t-price").textContent = state.service.price + " €";
+  document.getElementById("send").disabled = state.slot == null;
+}
+document.getElementById("send").onclick = function () {
+  var name = document.getElementById("b-name").value.trim(), r = document.getElementById("result");
+  r.hidden = false; r.className = "ok"; r.innerHTML = "";
+  if (!name) { r.textContent = "Bitte geben Sie Ihren Namen ein."; return; }
+  var b = document.createElement("b"); b.textContent = "Gebucht, " + name.split(" ")[0] + "!";
+  var p = document.createElement("span"); p.textContent = fmtDay(state.day) + " um " + hm(state.slot) + " Uhr. Demo: Im echten Betrieb landet der Termin im Salon-Kalender und Sie bekommen eine SMS.";
+  r.append(b, p);
+};
+(function init() {
+  var days = nextDays(); state.day = days[0];
+  var first = slotsFor(days[0], 60, 1).filter(function (x) { return !x.taken; })[0];
+  document.getElementById("next-free").textContent = WDL[days[0].getDay()] + ", " + (first ? hm(first.t) : "9:00") + " Uhr";
+  var h = document.getElementById("hours"), today = new Date().getDay();
+  [["Montag", "geschlossen", [1]], ["Dienstag – Freitag", "9:00 – 18:30", [2, 3, 4, 5]], ["Samstag", "9:00 – 14:00", [6]], ["Sonntag", "geschlossen", [0]]].forEach(function (r) {
+    var a = document.createElement("span"), b = document.createElement("span"); a.textContent = r[0]; b.textContent = r[1];
+    if (r[2].indexOf(today) > -1) { a.className = b.className = "today"; } h.append(a, b);
+  });
+  render();
+})();
+</script>
+</body>
+</html>
