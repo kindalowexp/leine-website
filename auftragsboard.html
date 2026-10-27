@@ -19,6 +19,7 @@
 }
 :root[data-theme="dark"] { --bg: #0f151b; --panel: #18212a; --col: #131b22; --ink: #e2e9ef; --muted: #91a1b0; --line: #283541; --side: #0a1015; --side-ink: #b9c7d3; --side-active: #18242f; --blue: #69a4e6; --amber: #e3a640; --green: #5cc283; --red: #e57575; --log-bg: #080d11; color-scheme: dark; }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; }
 body { background: var(--bg); color: var(--ink); font: 400 0.95rem/1.5 var(--sans); }
 button { font: 600 0.88rem/1 var(--sans); border-radius: 8px; padding: 9px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
@@ -101,6 +102,34 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
 .detail .acts button { flex: 1; }
 .detail .acts .pill { align-self: center; padding: 8px; }
 
+.view { display: grid; gap: 18px; min-width: 0; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.panel-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.panel-head h2 { margin: 0; font-size: 1.05rem; }
+.panel-head p { margin: 0; color: var(--muted); font-size: 0.85rem; max-width: 46em; }
+.search { min-width: min(320px, 100%); }
+.scroll { overflow-x: auto; min-width: 0; }
+.hint { margin: 0; color: var(--muted); font-size: 0.82rem; }
+.cal { display: grid; grid-template-columns: 150px repeat(5, minmax(130px, 1fr)); gap: 6px; min-width: 820px; }
+.cal .h { font: 600 0.75rem/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 4px; }
+.cal .h.today { color: var(--blue); }
+.cal .who { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.88rem; padding: 6px 4px; }
+.cal .cell { background: var(--col); border-radius: 8px; padding: 6px; display: grid; gap: 6px; align-content: start; min-height: 86px; }
+.cal .cell.today { box-shadow: inset 0 0 0 2px var(--blue); }
+.ev { text-align: left; font: 500 0.8rem/1.3 var(--sans); padding: 7px 8px; border-radius: 6px; border: 1px solid var(--line); border-left: 4px solid var(--blue); background: var(--panel); color: var(--ink); cursor: pointer; display: grid; gap: 2px; }
+.ev b { font: 600 0.72rem/1 var(--mono); color: var(--muted); }
+.ev.arbeit { border-left-color: var(--amber); }
+.ev.fertig { border-left-color: var(--green); opacity: .7; }
+.ev.fertig span::before { content: "✓ "; color: var(--green); }
+.ev.dring { border-left-color: var(--red); }
+.tbl { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 640px; }
+.tbl th { text-align: left; font: 600 0.7rem/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.tbl td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl .num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); white-space: nowrap; }
+.tbl small { display: block; color: var(--muted); }
+.tbl button { padding: 6px 10px; font-size: 0.8rem; white-space: nowrap; }
+.tbl .empty-row { color: var(--muted); text-align: center; padding: 18px; }
 .log { background: var(--log-bg); color: var(--log-ink); border-radius: 12px; padding: 14px 16px; font: 400 0.8rem/1.6 var(--mono); max-height: 300px; overflow: auto; }
 .log h2 { font: 600 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px; color: #8fb3c9; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .log h2 button { padding: 5px 9px; font-size: 0.7rem; background: transparent; color: #8fb3c9; border-color: #2b3d4b; }
@@ -120,6 +149,11 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
   .kpis { grid-template-columns: 1fr 1fr; }
   form.add { grid-template-columns: 1fr 1fr; } form.add .wide { grid-column: 1 / -1; }
 }
+@media (max-width: 680px) {
+  .cal { grid-template-columns: 96px repeat(5, 150px); min-width: 0; }
+  .cal .who, .cal .h:first-child { position: sticky; left: 0; z-index: 1; background: var(--panel); }
+  .cal .who { flex-direction: column; align-items: flex-start; gap: 4px; font-size: 0.8rem; }
+}
 @media (max-width: 680px) { .board { grid-template-columns: 1fr; } .detail { grid-template-columns: 1fr; } .detail .photo { aspect-ratio: 16 / 9; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -130,10 +164,10 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
   <aside class="side">
     <div class="logo"><i><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></i><div>Elektro Brandt<small>Hannover-List</small></div></div>
     <nav aria-label="Bereiche">
-      <a href="#" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span class="lbl">Aufträge</span><span class="n" id="nav-n">0</span></a>
-      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="lbl">Kalender</span></a>
-      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-4-5.5"/></svg><span class="lbl">Kunden</span></a>
-      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/></svg><span class="lbl">Rechnungen</span></a>
+      <a href="#auftraege" data-view="auftraege" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span class="lbl">Aufträge</span><span class="n" id="nav-n">0</span></a>
+      <a href="#kalender" data-view="kalender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="lbl">Kalender</span></a>
+      <a href="#kunden" data-view="kunden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-4-5.5"/></svg><span class="lbl">Kunden</span></a>
+      <a href="#rechnungen" data-view="rechnungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/></svg><span class="lbl">Rechnungen</span><span class="n" id="nav-r" hidden>0</span></a>
     </nav>
     <div class="crew"><h4>Heute im Einsatz</h4>
       <div><span class="av tm">TM</span>Tim Meyer<span class="st busy" title="Im Einsatz"></span></div>
@@ -144,9 +178,10 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
 
   <main class="main">
     <div class="top">
-      <div><h1>Aufträge</h1><p id="today"></p></div>
+      <div><h1 id="view-title">Aufträge</h1><p id="today"></p></div>
     </div>
 
+    <section class="view" id="view-auftraege">
     <div class="kpis" id="kpis"></div>
 
     <form class="add" id="add">
@@ -162,12 +197,40 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
       <div class="board" id="board"></div>
       <aside class="detail" id="detail" aria-live="polite"></aside>
     </div>
+    </section>
+
+    <section class="view" id="view-kalender" hidden>
+      <div class="panel">
+        <div class="panel-head"><h2>Einsatzplan</h2><p id="cal-range"></p></div>
+        <div class="scroll"><div class="cal" id="cal"></div></div>
+        <p class="hint">Klicken Sie auf einen Einsatz, um den Auftrag zu öffnen. Erledigte Einsätze sind abgehakt.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-kunden" hidden>
+      <div class="panel">
+        <div class="panel-head"><h2>Kunden</h2><label for="k-suche" class="search">Suchen<input id="k-suche" type="search" placeholder="Name, Ansprechpartner oder Straße"></label></div>
+        <div class="scroll"><table class="tbl" id="kunden"></table></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-rechnungen" hidden>
+      <div class="kpis" id="r-kpis"></div>
+      <div class="panel">
+        <div class="panel-head"><h2>Bereit zur Abrechnung</h2><p>Fertige Aufträge, die noch nicht an die Buchhaltung übergeben wurden.</p></div>
+        <div class="scroll"><table class="tbl" id="r-offen"></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Übertragene Rechnungsentwürfe</h2><p>Nummer, Freigabe und Versand übernimmt die Buchhaltungssoftware, damit Nummernkreise und Aufbewahrung GoBD-konform bleiben.</p></div>
+        <div class="scroll"><table class="tbl" id="r-liste"></table></div>
+      </div>
+    </section>
 
     <div class="log">
       <h2><span>Schnittstelle · Buchhaltung</span><button type="button" id="reset">Demo zurücksetzen</button></h2>
       <div id="log"></div>
     </div>
-    <p class="foot">Karten per Drag-and-drop verschieben oder in der Detailansicht weiterschalten. Erledigte Aufträge gehen als Rechnungsentwurf per <code>POST /api/rechnungen</code> an die Buchhaltung (z. B. lexoffice oder sevDesk). In dieser Demo wird die Anfrage simuliert, die Daten bleiben in Ihrem Browser.</p>
+    <p class="foot">Karten per Drag-and-drop verschieben oder in der Detailansicht weiterschalten. Erledigte Aufträge gehen als Rechnungsentwurf per <code>POST /api/rechnungen</code> an die Buchhaltung (z. B. lexoffice oder sevDesk). In dieser Demo wird die Anfrage simuliert, die Daten bleiben in Ihrem Browser. Kalender, Kunden und Rechnungen erreichen Sie über die Navigation.</p>
   </main>
 </div>
 
@@ -177,19 +240,27 @@ var PHOTOS = {
   messen: ["img/elektro-messen.jpg", "30% 50%"], verteiler: ["img/elektro-verteiler.jpg", "50% 52%"],
   monteur: ["img/elektro-monteur.jpg", "50% 45%"], schuetze: ["img/elektro-schuetze.jpg", "50% 40%"]
 };
-var STUNDENSATZ = 68, KEY = "auftragsboard-demo-v3";
+var STUNDENSATZ = 68, UST = 0.19, KEY = "auftragsboard-demo-v4";
 var COLS = [["offen", "Offen"], ["arbeit", "In Arbeit"], ["fertig", "Fertig"]];
 var CREW = { tm: "Tim Meyer", ak: "Anna Kowalski", js: "Jonas Schulz" };
 var SAMPLE = [
-  { id: 1041, titel: "Zählerschrank prüfen (E-Check)", kunde: "Bäckerei Ahrens", ort: "Lister Meile 00", std: 3, prio: "normal", s: "offen", m: "js", kat: "Prüfung", foto: "messen" },
-  { id: 1042, titel: "Wallbox 11 kW installieren", kunde: "Fam. Yilmaz", ort: "Podbielskistraße 00", std: 5, prio: "normal", s: "offen", m: "tm", kat: "E-Mobilität", foto: "monteur" },
-  { id: 1044, titel: "Außenbeleuchtung Hof", kunde: "Kita Sonnenblume", ort: "Wedekindplatz 00", std: 2.5, prio: "normal", s: "offen", m: "ak", kat: "Beleuchtung", foto: "schuetze" },
-  { id: 1043, titel: "Stromausfall Küche", kunde: "Café Lister Meile", ort: "Lister Meile 00", std: 1.5, prio: "dringend", s: "arbeit", m: "ak", kat: "Störung", foto: "monteur" },
-  { id: 1045, titel: "Unterverteilung Neubau", kunde: "Bau GmbH Nord", ort: "Vahrenwalder Str. 00", std: 8, prio: "normal", s: "arbeit", m: "tm", kat: "Installation", foto: "verteiler" },
-  { id: 1039, titel: "LED-Umrüstung Büro", kunde: "Kanzlei Weber", ort: "Sedanstraße 00", std: 6, prio: "normal", s: "fertig", m: "js", kat: "Beleuchtung", sent: true, foto: "schuetze" },
-  { id: 1040, titel: "Rauchmelder Mietshaus", kunde: "Hausverwaltung Nord", ort: "Bödekerstraße 00", std: 4, prio: "normal", s: "fertig", m: "ak", kat: "Sicherheit", foto: "verteiler" }
+  { id: 1041, titel: "Zählerschrank prüfen (E-Check)", kunde: "Bäckerei Ahrens", ort: "Lister Meile 00", std: 3, prio: "normal", s: "offen", m: "js", kat: "Prüfung", foto: "messen", tag: 1, start: 8 },
+  { id: 1042, titel: "Wallbox 11 kW installieren", kunde: "Fam. Yilmaz", ort: "Podbielskistraße 00", std: 5, prio: "normal", s: "offen", m: "tm", kat: "E-Mobilität", foto: "monteur", tag: 2, start: 8 },
+  { id: 1044, titel: "Außenbeleuchtung Hof", kunde: "Kita Sonnenblume", ort: "Wedekindplatz 00", std: 2.5, prio: "normal", s: "offen", m: "ak", kat: "Beleuchtung", foto: "schuetze", tag: 3, start: 13 },
+  { id: 1043, titel: "Stromausfall Küche", kunde: "Café Lister Meile", ort: "Lister Meile 00", std: 1.5, prio: "dringend", s: "arbeit", m: "ak", kat: "Störung", foto: "monteur", tag: 0, start: 7 },
+  { id: 1045, titel: "Unterverteilung Neubau", kunde: "Bau GmbH Nord", ort: "Vahrenwalder Str. 00", std: 8, prio: "normal", s: "arbeit", m: "tm", kat: "Installation", foto: "verteiler", tag: 0, start: 7 },
+  { id: 1039, titel: "LED-Umrüstung Büro", kunde: "Kanzlei Weber", ort: "Sedanstraße 00", std: 6, prio: "normal", s: "fertig", m: "js", kat: "Beleuchtung", sent: true, sentAt: -2, foto: "schuetze", tag: -2, start: 8 },
+  { id: 1040, titel: "Rauchmelder Mietshaus", kunde: "Hausverwaltung Nord", ort: "Bödekerstraße 00", std: 4, prio: "normal", s: "fertig", m: "ak", kat: "Sicherheit", foto: "verteiler", tag: -1, start: 9 }
 ];
-var data, logs = [], selected = 1043;
+var KUNDEN = {
+  "Bäckerei Ahrens": { nr: "K-0112", kontakt: "Heike Ahrens", art: "Gewerbe" },
+  "Fam. Yilmaz": { nr: "K-0187", kontakt: "Emre Yilmaz", art: "Privat" },
+  "Kita Sonnenblume": { nr: "K-0154", kontakt: "Frau Brandes (Leitung)", art: "Einrichtung" },
+  "Café Lister Meile": { nr: "K-0098", kontakt: "Marco Lenz", art: "Gastronomie" },
+  "Bau GmbH Nord": { nr: "K-0121", kontakt: "Bauleitung, Herr Kruse", art: "Gewerbe" },
+  "Kanzlei Weber": { nr: "K-0076", kontakt: "Dr. Sabine Weber", art: "Gewerbe" },
+  "Hausverwaltung Nord": { nr: "K-0143", kontakt: "Thomas Jansen", art: "Hausverwaltung" }
+};var data, logs = [], selected = 1043;
 function load() { try { var raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {} return JSON.parse(JSON.stringify(SAMPLE)); }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
 function euro(n) { return n.toLocaleString("de-DE", { style: "currency", currency: "EUR" }); }
@@ -225,7 +296,7 @@ function render() {
     });
     board.appendChild(col);
   });
-  renderDetail(); renderKpis(); renderLog();
+  renderDetail(); renderKpis(); renderLog(); renderCal(); renderKunden(); renderRechnungen();
 }
 function renderDetail() {
   var d = document.getElementById("detail"), a = byId(selected); d.innerHTML = "";
@@ -265,9 +336,10 @@ function renderKpis() {
 function sendInvoice(a) {
   var payload = { auftrag: a.id, kunde: a.kunde, leistungsort: a.ort + ", Hannover", positionen: [{ text: a.titel, menge: a.std, einheit: "Std.", einzelpreis: STUNDENSATZ }], summe_netto: a.std * STUNDENSATZ, status: "entwurf" };
   var t = new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  logs.unshift({ req: t + "  POST /api/rechnungen\n" + JSON.stringify(payload, null, 2), res: "201 Created · Rechnungsentwurf RE-2026-" + (300 + a.id % 100) + " angelegt" });
-  a.sent = true; save(); render();
+  logs.unshift({ req: t + "  POST /api/rechnungen\n" + JSON.stringify(payload, null, 2), res: "201 Created · Rechnungsentwurf " + reNr(a) + " angelegt" });
+  a.sent = true; a.sentAt = 0; save(); render();
 }
+function reNr(a) { return "RE-2026-" + (300 + a.id % 100); }
 function renderLog() {
   var l = document.getElementById("log"); l.innerHTML = "";
   if (!logs.length) { l.appendChild(el("pre", null, "Noch keine Übertragung. Wählen Sie einen fertigen Auftrag und klicken Sie auf „Rechnung an Buchhaltung“.")); return; }
@@ -278,12 +350,106 @@ document.getElementById("add").addEventListener("submit", function (e) {
   var t = document.getElementById("f-titel"), k = document.getElementById("f-kunde");
   if (!t.value.trim() || !k.value.trim()) { (t.value.trim() ? k : t).focus(); return; }
   var id = data.reduce(function (m, a) { return Math.max(m, a.id); }, 1000) + 1;
-  data.push({ id: id, titel: t.value.trim(), kunde: k.value.trim(), ort: "Adresse folgt", std: parseFloat(document.getElementById("f-std").value) || 1, prio: document.getElementById("f-prio").value, s: "offen", m: document.getElementById("f-mont").value, kat: "Neu", foto: "messen" });
+  data.push({ id: id, titel: t.value.trim(), kunde: k.value.trim(), ort: "Adresse folgt", std: parseFloat(document.getElementById("f-std").value) || 1, prio: document.getElementById("f-prio").value, s: "offen", m: document.getElementById("f-mont").value, kat: "Neu", foto: "messen", tag: 1 + id % 4, start: 8 });
   selected = id; t.value = ""; k.value = ""; save(); render();
 });
+/* Arbeitstage rund um heute: Index 0 = heute (bzw. nächster Werktag) */
+function workday(offset) {
+  var d = new Date(); d.setHours(0, 0, 0, 0);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  var step = offset < 0 ? -1 : 1, n = Math.abs(offset);
+  while (n > 0) { d.setDate(d.getDate() + step); if (d.getDay() !== 0 && d.getDay() !== 6) n--; }
+  return d;
+}
+function fmtD(d, opt) { return d.toLocaleDateString("de-DE", opt || { day: "2-digit", month: "2-digit", year: "numeric" }); }
+function hm(h) { return Math.floor(h) + ":" + (h % 1 ? "30" : "00"); }
+function go(id) { selected = id; location.hash = "auftraege"; render(); }
+
+function renderCal() {
+  var cal = document.getElementById("cal"); cal.innerHTML = "";
+  var days = [-1, 0, 1, 2, 3].map(workday);
+  document.getElementById("cal-range").textContent = fmtD(days[0], { day: "numeric", month: "long" }) + " bis " + fmtD(days[4], { day: "numeric", month: "long", year: "numeric" });
+  cal.appendChild(el("div", "h", "Monteur"));
+  days.forEach(function (d, i) { cal.appendChild(el("div", "h" + (i === 1 ? " today" : ""), fmtD(d, { weekday: "short", day: "2-digit", month: "2-digit" }) + (i === 1 ? " · heute" : ""))); });
+  Object.keys(CREW).forEach(function (code) {
+    var w = el("div", "who"); w.append(av(code), el("span", null, CREW[code])); cal.appendChild(w);
+    [-1, 0, 1, 2, 3].forEach(function (off, i) {
+      var cell = el("div", "cell" + (i === 1 ? " today" : ""));
+      data.filter(function (a) { return a.m === code && (a.tag == null ? 1 : a.tag) === off; })
+        .sort(function (x, y) { return x.start - y.start; })
+        .forEach(function (a) {
+          var b = el("button", "ev " + a.s + (a.prio === "dringend" && a.s !== "fertig" ? " dring" : "")); b.type = "button";
+          b.append(el("b", null, hm(a.start || 8) + "–" + hm((a.start || 8) + a.std) + " · #" + a.id), el("span", null, a.titel), el("small", null, a.kunde));
+          b.onclick = function () { go(a.id); }; cell.appendChild(b);
+        });
+      cal.appendChild(cell);
+    });
+  });
+}
+
+function renderKunden() {
+  var q = (document.getElementById("k-suche").value || "").toLowerCase(), t = document.getElementById("kunden"); t.innerHTML = "";
+  var names = []; data.forEach(function (a) { if (names.indexOf(a.kunde) < 0) names.push(a.kunde); });
+  var head = el("tr"); ["Kunde", "Ansprechpartner", "Adresse", "Aufträge", "Umsatz netto", "Offen"].forEach(function (h, i) { var th = el("th", i > 2 ? "num" : null, h); head.appendChild(th); });
+  t.appendChild(head);
+  var rows = names.map(function (n) {
+    var info = KUNDEN[n] || { nr: "neu", kontakt: "–", art: "Neukunde" }, jobs = data.filter(function (a) { return a.kunde === n; });
+    return { n: n, info: info, jobs: jobs, ort: jobs[0].ort };
+  }).filter(function (r) { return !q || (r.n + " " + r.info.kontakt + " " + r.ort).toLowerCase().indexOf(q) > -1; })
+    .sort(function (x, y) { return x.n.localeCompare(y.n, "de"); });
+  if (!rows.length) { var tr = el("tr"), td = el("td", "empty-row", "Kein Kunde gefunden."); td.colSpan = 6; tr.appendChild(td); t.appendChild(tr); return; }
+  rows.forEach(function (r) {
+    var tr = el("tr"), c1 = el("td"); c1.append(el("strong", null, r.n), el("small", null, r.info.nr + " · " + r.info.art));
+    var umsatz = r.jobs.filter(function (a) { return a.sent; }).reduce(function (s, a) { return s + a.std * STUNDENSATZ; }, 0);
+    var offen = r.jobs.filter(function (a) { return a.s !== "fertig"; }).length;
+    tr.append(c1, el("td", null, r.info.kontakt), el("td", null, r.ort + ", Hannover"), el("td", "num", String(r.jobs.length)), el("td", "num", euro(umsatz)), el("td", "num", offen ? offen + " Auftr." : "–"));
+    tr.style.cursor = "pointer"; tr.onclick = function () { go(r.jobs[0].id); };
+    t.appendChild(tr);
+  });
+}
+
+function renderRechnungen() {
+  var ready = data.filter(function (a) { return a.s === "fertig" && !a.sent; }), sent = data.filter(function (a) { return a.sent; });
+  var sum = function (l) { return l.reduce(function (s, a) { return s + a.std * STUNDENSATZ; }, 0); };
+  var k = document.getElementById("r-kpis"); k.innerHTML = "";
+  [["Bereit zur Abrechnung", String(ready.length), ready.length ? "warn" : ""], ["Offener Betrag netto", euro(sum(ready)), ready.length ? "warn" : ""], ["Übertragene Entwürfe", String(sent.length), ""], ["Übertragen brutto", euro(sum(sent) * (1 + UST)), ""]]
+    .forEach(function (x) { var t = el("div", "kpi " + x[2]); t.append(el("small", null, x[0]), el("b", null, x[1])); k.appendChild(t); });
+  var nr = document.getElementById("nav-r"); nr.textContent = ready.length; nr.hidden = !ready.length;
+
+  var o = document.getElementById("r-offen"); o.innerHTML = "";
+  var h1 = el("tr"); ["Auftrag", "Kunde", "Erledigt", "Netto", ""].forEach(function (h, i) { h1.appendChild(el("th", i === 3 ? "num" : null, h)); }); o.appendChild(h1);
+  if (!ready.length) { var tr0 = el("tr"), td0 = el("td", "empty-row", "Alles abgerechnet. Neue fertige Aufträge erscheinen hier."); td0.colSpan = 5; tr0.appendChild(td0); o.appendChild(tr0); }
+  ready.forEach(function (a) {
+    var tr = el("tr"), c = el("td"); c.append(el("strong", null, a.titel), el("small", null, "#" + a.id + " · " + a.std + " Std. · " + CREW[a.m]));
+    var b = el("button", "primary", "An Buchhaltung senden"); b.type = "button"; b.onclick = function () { sendInvoice(a); };
+    var cb = el("td"); cb.appendChild(b);
+    tr.append(c, el("td", null, a.kunde), el("td", null, fmtD(workday(a.tag == null ? 0 : a.tag))), el("td", "num", euro(a.std * STUNDENSATZ)), cb);
+    o.appendChild(tr);
+  });
+
+  var l = document.getElementById("r-liste"); l.innerHTML = "";
+  var h2 = el("tr"); ["Entwurf", "Kunde", "Übertragen", "Netto", "USt 19 %", "Brutto", "Status"].forEach(function (h, i) { h2.appendChild(el("th", i > 2 && i < 6 ? "num" : null, h)); }); l.appendChild(h2);
+  if (!sent.length) { var tr1 = el("tr"), td1 = el("td", "empty-row", "Noch keine Entwürfe übertragen."); td1.colSpan = 7; tr1.appendChild(td1); l.appendChild(tr1); }
+  sent.slice().sort(function (x, y) { return (y.sentAt || 0) - (x.sentAt || 0); }).forEach(function (a) {
+    var n = a.std * STUNDENSATZ, tr = el("tr"), c = el("td"); c.append(el("strong", null, reNr(a)), el("small", null, a.titel));
+    var st = el("td"); st.appendChild(el("span", "pill sent", "IN BUCHHALTUNG"));
+    tr.append(c, el("td", null, a.kunde), el("td", null, fmtD(workday(a.sentAt || 0))), el("td", "num", euro(n)), el("td", "num", euro(n * UST)), el("td", "num", euro(n * (1 + UST))), st);
+    l.appendChild(tr);
+  });
+}
+
+var TITLES = { auftraege: "Aufträge", kalender: "Kalender", kunden: "Kunden", rechnungen: "Rechnungen" };
+function showView() {
+  var v = (location.hash || "").replace("#", ""); if (!TITLES[v]) v = "auftraege";
+  Object.keys(TITLES).forEach(function (k) { document.getElementById("view-" + k).hidden = k !== v; });
+  document.querySelectorAll(".side nav a").forEach(function (a) { var on = a.dataset.view === v; a.classList.toggle("on", on); if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  document.getElementById("view-title").textContent = TITLES[v];
+}
+window.addEventListener("hashchange", showView);
+document.getElementById("k-suche").addEventListener("input", renderKunden);
 document.getElementById("reset").onclick = function () { data = JSON.parse(JSON.stringify(SAMPLE)); logs = []; selected = 1043; save(); render(); };
 document.getElementById("today").textContent = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + " · Stundensatz " + STUNDENSATZ + " €";
-data = load(); if (!byId(selected) && data[0]) selected = data[0].id; render();
+data = load(); if (!byId(selected) && data[0]) selected = data[0].id; render(); showView();
 </script>
 </body>
 </html>
