@@ -109,6 +109,16 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
 .panel-head p { margin: 0; color: var(--muted); font-size: 0.85rem; max-width: 46em; }
 .search { min-width: min(320px, 100%); }
 .scroll { overflow-x: auto; min-width: 0; }
+.combo { position: relative; }
+.combo ul { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0; min-width: 240px; max-height: 260px; overflow: auto; margin: 0; padding: 4px; list-style: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 12px 28px -12px rgba(0,0,0,.35); }
+.combo li { padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 0.88rem; font-weight: 500; color: var(--ink); display: grid; gap: 1px; }
+.combo li small { color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+.combo li.act, .combo li:hover { background: var(--col); }
+.combo li.neu { color: var(--blue); border-top: 1px solid var(--line); margin-top: 4px; }
+.combo li mark { background: color-mix(in srgb, var(--volt) 45%, transparent); color: inherit; border-radius: 2px; }
+.k-grid { display: grid; grid-template-columns: 1.4fr 1.2fr 1.4fr 0.9fr auto; gap: 10px; align-items: end; }
+@media (max-width: 900px) { .k-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .k-grid { grid-template-columns: 1fr; } }
 .hint { margin: 0; color: var(--muted); font-size: 0.82rem; }
 .cal { display: grid; grid-template-columns: 150px repeat(5, minmax(130px, 1fr)); gap: 6px; min-width: 820px; }
 .cal .h { font: 600 0.75rem/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 4px; }
@@ -186,7 +196,7 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
 
     <form class="add" id="add">
       <label class="wide" for="f-titel">Neuer Auftrag<input id="f-titel" placeholder="z. B. Steckdosen Küche erneuern" required></label>
-      <label for="f-kunde">Kunde<input id="f-kunde" placeholder="Name oder Firma" required></label>
+      <label for="f-kunde">Kunde<div class="combo"><input id="f-kunde" role="combobox" aria-expanded="false" aria-controls="f-kunde-list" aria-autocomplete="list" autocomplete="off" placeholder="Kunde suchen …" required><ul id="f-kunde-list" role="listbox" hidden></ul></div></label>
       <label for="f-std">Std.<input id="f-std" type="number" min="0.5" step="0.5" value="2"></label>
       <label for="f-mont">Monteur<select id="f-mont"><option value="tm">Tim Meyer</option><option value="ak">Anna Kowalski</option><option value="js">Jonas Schulz</option></select></label>
       <label for="f-prio">Priorität<select id="f-prio"><option value="normal">Normal</option><option value="dringend">Dringend</option></select></label>
@@ -212,6 +222,17 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
         <div class="panel-head"><h2>Kunden</h2><label for="k-suche" class="search">Suchen<input id="k-suche" type="search" placeholder="Name, Ansprechpartner oder Straße"></label></div>
         <div class="scroll"><table class="tbl" id="kunden"></table></div>
       </div>
+      <form class="panel" id="k-form" novalidate>
+        <div class="panel-head"><h2>Neuen Kunden anlegen</h2><p id="k-hint">Danach können Sie den Kunden beim Anlegen eines Auftrags auswählen.</p></div>
+        <div class="k-grid">
+          <label for="k-name">Firma oder Name<input id="k-name" placeholder="z. B. Friseur Schnittpunkt" required></label>
+          <label for="k-kontakt">Ansprechpartner<input id="k-kontakt" placeholder="z. B. Mira Hoffmann"></label>
+          <label for="k-ort">Straße und Hausnummer<input id="k-ort" placeholder="z. B. Limmerstraße 00" required></label>
+          <label for="k-art">Art<select id="k-art"><option>Gewerbe</option><option>Privat</option><option>Gastronomie</option><option>Hausverwaltung</option><option>Einrichtung</option></select></label>
+          <button class="primary" type="submit">Kunde anlegen</button>
+        </div>
+        <p class="hint" id="k-msg" role="status"></p>
+      </form>
     </section>
 
     <section class="view" id="view-rechnungen" hidden>
@@ -240,7 +261,7 @@ var PHOTOS = {
   messen: ["img/elektro-messen.jpg", "30% 50%"], verteiler: ["img/elektro-verteiler.jpg", "50% 52%"],
   monteur: ["img/elektro-monteur.jpg", "50% 45%"], schuetze: ["img/elektro-schuetze.jpg", "50% 40%"]
 };
-var STUNDENSATZ = 68, UST = 0.19, KEY = "auftragsboard-demo-v4";
+var STUNDENSATZ = 68, UST = 0.19, KEY = "auftragsboard-demo-v5";
 var COLS = [["offen", "Offen"], ["arbeit", "In Arbeit"], ["fertig", "Fertig"]];
 var CREW = { tm: "Tim Meyer", ak: "Anna Kowalski", js: "Jonas Schulz" };
 var SAMPLE = [
@@ -253,16 +274,18 @@ var SAMPLE = [
   { id: 1040, titel: "Rauchmelder Mietshaus", kunde: "Hausverwaltung Nord", ort: "Bödekerstraße 00", std: 4, prio: "normal", s: "fertig", m: "ak", kat: "Sicherheit", foto: "verteiler", tag: -1, start: 9 }
 ];
 var KUNDEN = {
-  "Bäckerei Ahrens": { nr: "K-0112", kontakt: "Heike Ahrens", art: "Gewerbe" },
-  "Fam. Yilmaz": { nr: "K-0187", kontakt: "Emre Yilmaz", art: "Privat" },
-  "Kita Sonnenblume": { nr: "K-0154", kontakt: "Frau Brandes (Leitung)", art: "Einrichtung" },
-  "Café Lister Meile": { nr: "K-0098", kontakt: "Marco Lenz", art: "Gastronomie" },
-  "Bau GmbH Nord": { nr: "K-0121", kontakt: "Bauleitung, Herr Kruse", art: "Gewerbe" },
-  "Kanzlei Weber": { nr: "K-0076", kontakt: "Dr. Sabine Weber", art: "Gewerbe" },
-  "Hausverwaltung Nord": { nr: "K-0143", kontakt: "Thomas Jansen", art: "Hausverwaltung" }
-};var data, logs = [], selected = 1043;
+  "Bäckerei Ahrens": { nr: "K-0112", kontakt: "Heike Ahrens", art: "Gewerbe", ort: "Lister Meile 00" },
+  "Fam. Yilmaz": { nr: "K-0187", kontakt: "Emre Yilmaz", art: "Privat", ort: "Podbielskistraße 00" },
+  "Kita Sonnenblume": { nr: "K-0154", kontakt: "Frau Brandes (Leitung)", art: "Einrichtung", ort: "Wedekindplatz 00" },
+  "Café Lister Meile": { nr: "K-0098", kontakt: "Marco Lenz", art: "Gastronomie", ort: "Lister Meile 00" },
+  "Bau GmbH Nord": { nr: "K-0121", kontakt: "Bauleitung, Herr Kruse", art: "Gewerbe", ort: "Vahrenwalder Str. 00" },
+  "Kanzlei Weber": { nr: "K-0076", kontakt: "Dr. Sabine Weber", art: "Gewerbe", ort: "Sedanstraße 00" },
+  "Hausverwaltung Nord": { nr: "K-0143", kontakt: "Thomas Jansen", art: "Hausverwaltung", ort: "Bödekerstraße 00" }
+};
+var data, kunden, logs = [], selected = 1043, pendingKunde = false;
 function load() { try { var raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {} return JSON.parse(JSON.stringify(SAMPLE)); }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+function loadKunden() { try { var raw = localStorage.getItem(KEY + "-kunden"); if (raw) return JSON.parse(raw); } catch (e) {} return JSON.parse(JSON.stringify(KUNDEN)); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); localStorage.setItem(KEY + "-kunden", JSON.stringify(kunden)); } catch (e) {} }
 function euro(n) { return n.toLocaleString("de-DE", { style: "currency", currency: "EUR" }); }
 function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 function av(code) { var a = el("span", "av " + code, code.toUpperCase()); a.title = CREW[code]; return a; }
@@ -348,9 +371,11 @@ function renderLog() {
 document.getElementById("add").addEventListener("submit", function (e) {
   e.preventDefault();
   var t = document.getElementById("f-titel"), k = document.getElementById("f-kunde");
-  if (!t.value.trim() || !k.value.trim()) { (t.value.trim() ? k : t).focus(); return; }
+  if (!t.value.trim()) { t.focus(); return; }
+  if (!kunden[k.value.trim()]) { k.focus(); openCombo(); return; }
+  k.value = k.value.trim();
   var id = data.reduce(function (m, a) { return Math.max(m, a.id); }, 1000) + 1;
-  data.push({ id: id, titel: t.value.trim(), kunde: k.value.trim(), ort: "Adresse folgt", std: parseFloat(document.getElementById("f-std").value) || 1, prio: document.getElementById("f-prio").value, s: "offen", m: document.getElementById("f-mont").value, kat: "Neu", foto: "messen", tag: 1 + id % 4, start: 8 });
+  data.push({ id: id, titel: t.value.trim(), kunde: k.value, ort: kunden[k.value].ort, std: parseFloat(document.getElementById("f-std").value) || 1, prio: document.getElementById("f-prio").value, s: "offen", m: document.getElementById("f-mont").value, kat: "Neu", foto: "messen", tag: 1 + id % 4, start: 8 });
   selected = id; t.value = ""; k.value = ""; save(); render();
 });
 /* Arbeitstage rund um heute: Index 0 = heute (bzw. nächster Werktag) */
@@ -389,12 +414,12 @@ function renderCal() {
 
 function renderKunden() {
   var q = (document.getElementById("k-suche").value || "").toLowerCase(), t = document.getElementById("kunden"); t.innerHTML = "";
-  var names = []; data.forEach(function (a) { if (names.indexOf(a.kunde) < 0) names.push(a.kunde); });
+  var names = Object.keys(kunden); data.forEach(function (a) { if (names.indexOf(a.kunde) < 0) names.push(a.kunde); });
   var head = el("tr"); ["Kunde", "Ansprechpartner", "Adresse", "Aufträge", "Umsatz netto", "Offen"].forEach(function (h, i) { var th = el("th", i > 2 ? "num" : null, h); head.appendChild(th); });
   t.appendChild(head);
   var rows = names.map(function (n) {
-    var info = KUNDEN[n] || { nr: "neu", kontakt: "–", art: "Neukunde" }, jobs = data.filter(function (a) { return a.kunde === n; });
-    return { n: n, info: info, jobs: jobs, ort: jobs[0].ort };
+    var info = kunden[n] || { nr: "neu", kontakt: "–", art: "Neukunde" }, jobs = data.filter(function (a) { return a.kunde === n; });
+    return { n: n, info: info, jobs: jobs, ort: info.ort || (jobs[0] ? jobs[0].ort : "–") };
   }).filter(function (r) { return !q || (r.n + " " + r.info.kontakt + " " + r.ort).toLowerCase().indexOf(q) > -1; })
     .sort(function (x, y) { return x.n.localeCompare(y.n, "de"); });
   if (!rows.length) { var tr = el("tr"), td = el("td", "empty-row", "Kein Kunde gefunden."); td.colSpan = 6; tr.appendChild(td); t.appendChild(tr); return; }
@@ -402,8 +427,9 @@ function renderKunden() {
     var tr = el("tr"), c1 = el("td"); c1.append(el("strong", null, r.n), el("small", null, r.info.nr + " · " + r.info.art));
     var umsatz = r.jobs.filter(function (a) { return a.sent; }).reduce(function (s, a) { return s + a.std * STUNDENSATZ; }, 0);
     var offen = r.jobs.filter(function (a) { return a.s !== "fertig"; }).length;
-    tr.append(c1, el("td", null, r.info.kontakt), el("td", null, r.ort + ", Hannover"), el("td", "num", String(r.jobs.length)), el("td", "num", euro(umsatz)), el("td", "num", offen ? offen + " Auftr." : "–"));
-    tr.style.cursor = "pointer"; tr.onclick = function () { go(r.jobs[0].id); };
+    tr.append(c1, el("td", null, r.info.kontakt), el("td", null, r.ort + ", Hannover"), el("td", "num", String(r.jobs.length)), el("td", "num", euro(umsatz)), el("td", "num", offen ? offen + " Auftr." : (r.jobs.length ? "–" : "neu")));
+    tr.style.cursor = "pointer"; tr.title = r.jobs.length ? "Auftrag öffnen" : "Auftrag für diesen Kunden anlegen";
+    tr.onclick = function () { if (r.jobs.length) go(r.jobs[0].id); else startAuftrag(r.n); };
     t.appendChild(tr);
   });
 }
@@ -447,9 +473,76 @@ function showView() {
 }
 window.addEventListener("hashchange", showView);
 document.getElementById("k-suche").addEventListener("input", renderKunden);
-document.getElementById("reset").onclick = function () { data = JSON.parse(JSON.stringify(SAMPLE)); logs = []; selected = 1043; save(); render(); };
+/* Kundensuche im Auftragsformular */
+var combo = { input: document.getElementById("f-kunde"), list: document.getElementById("f-kunde-list"), items: [], act: -1 };
+function renderKundenSelect(value) { if (value != null) combo.input.value = value; closeCombo(); }
+function closeCombo() { combo.list.hidden = true; combo.input.setAttribute("aria-expanded", "false"); combo.act = -1; }
+function hl(text, q) {
+  var f = document.createDocumentFragment(), i = q ? text.toLowerCase().indexOf(q) : -1;
+  if (i < 0) { f.append(text); return f; }
+  var m = document.createElement("mark"); m.textContent = text.slice(i, i + q.length);
+  f.append(text.slice(0, i), m, text.slice(i + q.length)); return f;
+}
+function openCombo() {
+  var raw = combo.input.value.trim(), q = raw.toLowerCase(); combo.list.innerHTML = ""; combo.items = [];
+  Object.keys(kunden).filter(function (n) { var k = kunden[n]; return !q || (n + " " + k.kontakt + " " + k.ort + " " + k.nr).toLowerCase().indexOf(q) > -1; })
+    .sort(function (a, b) { return a.localeCompare(b, "de"); })
+    .forEach(function (n) { combo.items.push({ name: n }); });
+  combo.items.push({ neu: true, name: raw });
+  combo.items.forEach(function (it, i) {
+    var li = el("li", it.neu ? "neu" : null); li.id = "kopt-" + i; li.setAttribute("role", "option");
+    if (it.neu) li.textContent = raw && !kunden[raw] ? "+ „" + raw + "“ als neuen Kunden anlegen" : "+ Neuen Kunden anlegen";
+    else { var b = el("span"); b.appendChild(hl(it.name, q)); li.append(b, el("small", null, kunden[it.name].nr + " · " + kunden[it.name].ort)); }
+    li.addEventListener("mousedown", function (e) { e.preventDefault(); pick(i); });
+    combo.list.appendChild(li);
+  });
+  combo.act = combo.items.length > 1 && q ? 0 : -1; mark();
+  combo.list.hidden = false; combo.input.setAttribute("aria-expanded", "true");
+}
+function mark() {
+  [].forEach.call(combo.list.children, function (li, i) { li.classList.toggle("act", i === combo.act); });
+  if (combo.act > -1) { combo.input.setAttribute("aria-activedescendant", "kopt-" + combo.act); combo.list.children[combo.act].scrollIntoView({ block: "nearest" }); }
+  else combo.input.removeAttribute("aria-activedescendant");
+}
+function pick(i) {
+  var it = combo.items[i]; closeCombo();
+  if (!it.neu) { combo.input.value = it.name; document.getElementById("f-std").focus(); return; }
+  pendingKunde = true; location.hash = "kunden";
+  document.getElementById("k-name").value = it.name && !kunden[it.name] ? it.name : "";
+  document.getElementById("k-hint").textContent = "Nach dem Anlegen kehren Sie automatisch zum Auftrag zurück.";
+  setTimeout(function () { var n = document.getElementById("k-name"); (n.value ? document.getElementById("k-kontakt") : n).focus(); }, 0);
+}
+combo.input.addEventListener("input", openCombo);
+combo.input.addEventListener("focus", function () { if (kunden[combo.input.value]) combo.input.select(); openCombo(); });
+combo.input.addEventListener("blur", function () { setTimeout(closeCombo, 100); });
+combo.input.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault(); if (combo.list.hidden) openCombo();
+    var n = combo.items.length; combo.act = e.key === "ArrowDown" ? (combo.act + 1) % n : (combo.act - 1 + n) % n; mark();
+  } else if (e.key === "Enter" && !combo.list.hidden && combo.act > -1) { e.preventDefault(); pick(combo.act); }
+  else if (e.key === "Escape") closeCombo();
+});
+function startAuftrag(name) {
+  location.hash = "auftraege"; renderKundenSelect(name);
+  setTimeout(function () { document.getElementById("f-titel").focus(); }, 0);
+}
+document.getElementById("k-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var n = document.getElementById("k-name"), o = document.getElementById("k-ort"), msg = document.getElementById("k-msg");
+  var name = n.value.trim(), ort = o.value.trim();
+  if (!name) { msg.textContent = "Bitte Firma oder Name eintragen."; n.focus(); return; }
+  if (!ort) { msg.textContent = "Bitte Straße und Hausnummer eintragen."; o.focus(); return; }
+  if (kunden[name]) { msg.textContent = "„" + name + "“ gibt es schon."; n.focus(); return; }
+  var max = Object.keys(kunden).reduce(function (m, k) { var x = parseInt(String(kunden[k].nr).replace(/\D/g, ""), 10) || 0; return Math.max(m, x); }, 0);
+  kunden[name] = { nr: "K-" + String(max + 1).padStart(4, "0"), kontakt: document.getElementById("k-kontakt").value.trim() || "–", art: document.getElementById("k-art").value, ort: ort };
+  save(); this.reset(); msg.textContent = "Kunde „" + name + "“ angelegt (" + kunden[name].nr + ").";
+  renderKunden();
+  if (pendingKunde) { pendingKunde = false; document.getElementById("k-hint").textContent = "Danach können Sie den Kunden beim Anlegen eines Auftrags auswählen."; startAuftrag(name); }
+});
+
+document.getElementById("reset").onclick = function () { data = JSON.parse(JSON.stringify(SAMPLE)); kunden = JSON.parse(JSON.stringify(KUNDEN)); logs = []; selected = 1043; save(); renderKundenSelect(""); render(); };
 document.getElementById("today").textContent = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + " · Stundensatz " + STUNDENSATZ + " €";
-data = load(); if (!byId(selected) && data[0]) selected = data[0].id; render(); showView();
+data = load(); kunden = loadKunden(); if (!byId(selected) && data[0]) selected = data[0].id; renderKundenSelect(""); render(); showView();
 </script>
 </body>
 </html>
