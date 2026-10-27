@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mieterportal Hausverwaltung Nord</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: ruhiges Portal. Kopfzeile mit Rollenwechsel, darunter je Rolle ein Arbeitsbereich: Mieter melden und verfolgen, Verwaltung sortiert, vergibt und sieht die Schnittstelle */
+:root {
+  --bg: #f1f4f2; --panel: #ffffff; --soft: #e6ece8; --ink: #17241f; --muted: #5a6b64; --line: #d4ddd8;
+  --green: #1f5c4b; --green-ink: #ffffff; --green-soft: #dcebe5; --amber: #b5730b; --red: #b8402f; --blue: #2e66a8; --done: #2f7d4f;
+  --log-bg: #10201b; --log-ink: #cfe3da;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0f1714; --panel: #17221e; --soft: #1e2b26; --ink: #e4ede9; --muted: #98aba3; --line: #2a3a34; --green: #5fb89c; --green-ink: #0f1714; --green-soft: #1d3a31; --amber: #e1a246; --red: #e47a68; --blue: #79a9e3; --done: #6cc792; --log-bg: #08100d; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0f1714; --panel: #17221e; --soft: #1e2b26; --ink: #e4ede9; --muted: #98aba3; --line: #2a3a34; --green: #5fb89c; --green-ink: #0f1714; --green-soft: #1d3a31; --amber: #e1a246; --red: #e47a68; --blue: #79a9e3; --done: #6cc792; --log-bg: #08100d; color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 1rem/1.55 var(--body); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.demo-flag { background: var(--green); color: var(--green-ink); font-size: 0.85rem; text-align: center; padding: 6px 16px; }
+.demo-flag a { color: inherit; }
+
+header.top { background: var(--panel); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--green); color: var(--green-ink); font-style: normal; }
+.brand i svg { width: 22px; height: 22px; }
+.brand b { display: block; font: 700 1.1rem/1.1 var(--display); }
+.brand small { color: var(--muted); font-size: 0.85rem; }
+.roles { display: inline-flex; background: var(--soft); border-radius: 10px; padding: 4px; gap: 4px; flex-wrap: wrap; }
+.roles button { border: 0; background: transparent; padding: 8px 14px; border-radius: 7px; font-weight: 600; font-size: 0.92rem; display: flex; align-items: center; gap: 8px; }
+.roles button[aria-pressed="true"] { background: var(--panel); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.av { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--green-soft); color: var(--green); font: 700 0.7rem/1 var(--body); flex: none; }
+
+main { padding-block: 28px 48px; }
+.page-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.page-head h1 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); }
+.page-head p { color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.panel > h2 { font-size: 1.2rem; }
+.label { font: 600 0.78rem/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+label.f { display: grid; gap: 6px; font-weight: 600; font-size: 0.92rem; }
+input[type=text], select, textarea { padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); width: 100%; min-width: 0; }
+textarea { min-height: 96px; resize: vertical; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1.5px solid var(--line); background: transparent; border-radius: 999px; padding: 7px 13px; font-weight: 600; font-size: 0.9rem; }
+.chip[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+.drop { border: 2px dashed var(--line); border-radius: 12px; padding: 16px; display: flex; gap: 14px; align-items: center; cursor: pointer; background: var(--bg); }
+.drop:hover, .drop.over { border-color: var(--green); }
+.drop img { width: 84px; height: 64px; object-fit: cover; border-radius: 8px; }
+.drop span { color: var(--muted); font-size: 0.92rem; }
+.drop b { color: var(--ink); display: block; }
+.switch { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; }
+.switch input { width: 20px; height: 20px; accent-color: var(--red); }
+.btn { border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 700; background: var(--green); color: var(--green-ink); }
+.btn.ghost { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.msg { font-size: 0.92rem; color: var(--done); }
+
+/* Meldungen */
+.tickets { display: grid; gap: 12px; }
+.ticket { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; background: var(--panel); text-align: left; width: 100%; }
+button.ticket { cursor: pointer; }
+button.ticket:hover { border-color: var(--green); }
+.ticket.sel { border-color: var(--green); box-shadow: 0 0 0 2px var(--green); }
+.t-head { display: flex; gap: 12px; align-items: start; }
+.t-head .noimg { display: grid; place-items: center; font: 700 1.3rem/1 var(--display); color: var(--green); }
+.t-head img, .t-head .noimg { width: 64px; height: 52px; border-radius: 8px; object-fit: cover; flex: none; background: var(--soft); }
+.t-head div { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.t-head b { font-weight: 700; overflow-wrap: anywhere; }
+.t-head small { color: var(--muted); font-size: 0.85rem; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font: 600 0.7rem/1 var(--mono); letter-spacing: .04em; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.st-neu { color: var(--blue); background: color-mix(in srgb, var(--blue) 13%, transparent); }
+.st-beauftragt { color: var(--amber); background: color-mix(in srgb, var(--amber) 14%, transparent); }
+.st-arbeit { color: var(--amber); background: color-mix(in srgb, var(--amber) 14%, transparent); }
+.st-erledigt { color: var(--done); background: color-mix(in srgb, var(--done) 14%, transparent); }
+.dring { color: var(--red); background: color-mix(in srgb, var(--red) 13%, transparent); }
+.api { color: var(--green); background: var(--green-soft); }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.steps span { height: 6px; border-radius: 3px; background: var(--soft); }
+.steps span.on { background: var(--green); }
+.steps-l { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; font-size: 0.72rem; color: var(--muted); }
+.empty { color: var(--muted); text-align: center; padding: 24px 8px; }
+
+/* Verwaltung */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+.kpi small { color: var(--muted); font-size: 0.85rem; }
+.kpi b { font: 600 1.6rem/1.15 var(--mono); font-variant-numeric: tabular-nums; }
+.kpi.warn b { color: var(--blue); }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs button { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 12px; font-weight: 600; font-size: 0.88rem; }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.detail-photo { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: var(--soft); max-width: 100%; }
+dl.meta { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 0.93rem; }
+dl.meta dt { color: var(--muted); }
+dl.meta dd { margin: 0; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.verlauf { display: grid; gap: 0; border-left: 2px solid var(--line); margin-left: 6px; }
+.verlauf div { position: relative; padding: 0 0 12px 16px; font-size: 0.9rem; }
+.verlauf div::before { content: ""; position: absolute; left: -6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--green); }
+.verlauf small { display: block; color: var(--muted); font-size: 0.8rem; }
+.assign { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+.log { background: var(--log-bg); color: var(--log-ink); border-radius: 14px; padding: 16px; font: 400 0.8rem/1.6 var(--mono); max-height: 320px; overflow: auto; margin-top: 20px; }
+.log h2 { font: 600 0.75rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #8fc4b0; margin: 0 0 10px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.log h2 a { color: #8fc4b0; }
+.log pre { margin: 0 0 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.log .in { color: #f2c56b; }
+.log .ok { color: #82d6a4; }
+.foot { color: var(--muted); font-size: 0.85rem; margin-top: 16px; }
+.foot a { color: var(--green); }
+
+@media (max-width: 960px) { .grid2 { grid-template-columns: 1fr; } .kpis { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .row2, .assign { grid-template-columns: 1fr; } .roles button { padding: 8px 10px; } .steps-l { font-size: 0.66rem; } }
+@media (prefers-reduced-motion: no-preference) { .ticket, .chip, .btn { transition: border-color .15s, background .15s, box-shadow .15s; } }
+</style>
+</head>
+<body>
+<div class="demo-flag">Portfolio-Demo von Leinecode. Hausverwaltung und Mieter sind ausgedacht. <a href="index.html">Zurück zur Übersicht</a></div>
+<header class="top"><div class="wrap">
+  <div class="brand"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></i><div><b>Hausverwaltung Nord</b><small>Mieterportal · Hannover</small></div></div>
+  <div class="roles" role="group" aria-label="Ansicht wählen">
+    <button type="button" data-role="mieter" aria-pressed="true"><span class="av">FS</span>Mieterin</button>
+    <button type="button" data-role="verwaltung" aria-pressed="false"><span class="av">TJ</span>Verwaltung</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <!-- Mieter -->
+  <section id="v-mieter">
+    <div class="page-head"><div><h1>Guten Tag, Frau Schäfer</h1><p>Bödekerstraße 00 · 2. OG links · Mietvertrag 4711-23</p></div></div>
+    <div class="grid2">
+      <form class="panel" id="melden" novalidate>
+        <h2>Schaden melden</h2>
+        <div class="f"><span class="label">Was ist betroffen?</span><div class="chips" id="kat"></div></div>
+        <div class="row2">
+          <label class="f" for="m-raum">Raum<select id="m-raum"><option>Bad</option><option>Küche</option><option>Wohnzimmer</option><option>Schlafzimmer</option><option>Flur</option><option>Treppenhaus</option><option>Keller</option></select></label>
+          <label class="f" for="m-titel">Kurz gesagt<input type="text" id="m-titel" placeholder="z. B. Licht geht nicht" maxlength="60"></label>
+        </div>
+        <label class="f" for="m-text">Beschreibung<textarea id="m-text" placeholder="Seit wann? Was haben Sie schon versucht?"></textarea></label>
+        <label class="drop" id="drop" for="m-foto"><img id="m-prev" alt="" hidden><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" id="m-ico"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg><span><b id="m-fname">Foto hinzufügen</b>Hilft dem Handwerker, das richtige Material mitzubringen.</span></label>
+        <input type="file" id="m-foto" accept="image/*" hidden>
+        <label class="switch" for="m-dring"><input type="checkbox" id="m-dring">Dringend (z. B. Wasser läuft, kein Strom in der ganzen Wohnung)</label>
+        <div><button class="btn" type="submit">Meldung absenden</button></div>
+        <p class="msg" id="m-msg" role="status"></p>
+      </form>
+      <section class="panel" aria-labelledby="h-meine">
+        <h2 id="h-meine">Meine Meldungen</h2>
+        <div class="tickets" id="meine"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- Verwaltung -->
+  <section id="v-verwaltung" hidden>
+    <div class="page-head"><div><h1>Meldungen</h1><p>Alle Objekte · angemeldet als Thomas Jansen</p></div>
+      <div class="tabs" id="tabs" role="group" aria-label="Filter"></div></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <section class="panel" aria-label="Liste der Meldungen"><div class="tickets" id="liste"></div></section>
+      <section class="panel" id="detail" aria-live="polite"></section>
+    </div>
+    <div class="log" aria-live="polite">
+      <h2><span>Schnittstelle · Elektro Brandt</span><a href="auftragsboard.html">Auftragsboard öffnen →</a></h2>
+      <div id="log"></div>
+    </div>
+    <p class="foot">Vergeben Sie eine Elektro-Meldung an Elektro Brandt: Sie erscheint sofort im <a href="auftragsboard.html">Auftragsboard</a> des Betriebs. Schiebt der Betrieb den Auftrag dort auf „In Arbeit“ oder „Fertig“, kommt der Status automatisch hierher und zur Mieterin zurück. Beide Demos laufen in Ihrem Browser und tauschen die Daten über den lokalen Speicher aus. <button type="button" id="reset" class="btn ghost" style="padding:6px 10px;font-size:.82rem;margin-left:6px">Demo zurücksetzen</button></p>
+  </section>
+</main>
+
+<script>
+var KEY = "mieterportal-demo-v1", BOARD = "auftragsboard-demo-v6", INBOX = "auftragsboard-inbox";
+var KATS = ["Elektro", "Sanitär", "Heizung", "Fenster und Türen", "Sonstiges"];
+var FIRMEN = {
+  "Elektro Brandt": { gewerk: "Elektro", api: true },
+  "Sanitär Hoffmann": { gewerk: "Sanitär", api: false },
+  "Heizung Krüger": { gewerk: "Heizung", api: false },
+  "Hausmeisterservice Laatzen": { gewerk: "Sonstiges", api: false }
+};
+var STEPS = [["neu", "Gemeldet"], ["beauftragt", "Beauftragt"], ["arbeit", "In Arbeit"], ["erledigt", "Erledigt"]];
+function ago(days, h) { var d = new Date(); d.setDate(d.getDate() - days); d.setHours(h || 9, 0, 0, 0); return d.toISOString(); }
+var SAMPLE = [
+  { id: "M-0412", kat: "Elektro", raum: "Bad", titel: "Steckdosen im Bad ohne Strom", text: "Seit heute Morgen gehen beide Steckdosen am Spiegel nicht mehr. Die Sicherung ist nicht rausgesprungen.", dring: false, foto: "img/elektro-messen.jpg", status: "neu", mieter: "Familie Schäfer", whg: "Bödekerstraße 00 · 2. OG links", verlauf: [{ t: ago(0, 8), text: "Meldung eingegangen" }] },
+  { id: "M-0410", kat: "Fenster und Türen", raum: "Schlafzimmer", titel: "Fenstergriff locker", text: "Der Griff lässt sich fast ganz herausziehen, das Fenster schließt noch.", dring: false, foto: "", status: "neu", mieter: "Frau Lindner", whg: "Podbielskistraße 00 · 1. OG", verlauf: [{ t: ago(1, 17), text: "Meldung eingegangen" }] },
+  { id: "M-0409", kat: "Sanitär", raum: "Küche", titel: "Wasserhahn tropft", text: "Tropft auch, wenn er ganz zugedreht ist.", dring: false, foto: "", status: "beauftragt", firma: "Sanitär Hoffmann", mieter: "Herr Okafor", whg: "Bödekerstraße 00 · EG rechts", verlauf: [{ t: ago(3, 10), text: "Meldung eingegangen" }, { t: ago(2, 9), text: "Sanitär Hoffmann per E-Mail beauftragt" }] },
+  { id: "M-0405", kat: "Heizung", raum: "Wohnzimmer", titel: "Heizkörper bleibt kalt", text: "Nur der Heizkörper im Wohnzimmer, die anderen sind warm.", dring: false, foto: "", status: "erledigt", firma: "Heizung Krüger", mieter: "Familie Schäfer", whg: "Bödekerstraße 00 · 2. OG links", verlauf: [{ t: ago(9, 11), text: "Meldung eingegangen" }, { t: ago(8, 9), text: "Heizung Krüger per E-Mail beauftragt" }, { t: ago(6, 15), text: "Erledigt: Heizkörper entlüftet, Ventil getauscht" }] },
+  { id: "M-0398", kat: "Elektro", raum: "Treppenhaus", titel: "Rauchmelder piepen im Treppenhaus", text: "Mehrere Rauchmelder piepen alle paar Minuten.", dring: false, foto: "img/elektro-verteiler.jpg", status: "erledigt", firma: "Elektro Brandt", auftrag: 1040, mieter: "Herr Okafor", whg: "Bödekerstraße 00 · Treppenhaus", verlauf: [{ t: ago(5, 9), text: "Meldung eingegangen" }, { t: ago(4, 10), text: "Elektro Brandt über Schnittstelle beauftragt (Auftrag #1040)" }, { t: ago(1, 14), text: "Elektro Brandt meldet: erledigt" }] }
+];
+var data, logs = [], role = "mieter", filter = "offen", selected = "M-0412", form = { kat: "Elektro", foto: "" };
+
+function load() { try { var r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch (e) {} return JSON.parse(JSON.stringify(SAMPLE)); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function byId(id) { return data.filter(function (t) { return t.id === id; })[0]; }
+function stLabel(s) { return STEPS.filter(function (x) { return x[0] === s; })[0][1]; }
+function when(iso) {
+  var d = new Date(iso), days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(iso).setHours(0, 0, 0, 0)) / 864e5);
+  var t = d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  return (days === 0 ? "heute" : days === 1 ? "gestern" : "vor " + days + " Tagen") + ", " + t + " Uhr";
+}
+function stamp() { return new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
+function nextId() { var m = data.reduce(function (x, t) { return Math.max(x, parseInt(t.id.slice(2), 10)); }, 0); return "M-" + String(m + 1).padStart(4, "0"); }
+
+/* Schnittstelle: Status aus dem Auftragsboard zurückholen */
+var MAP = { offen: "beauftragt", arbeit: "arbeit", fertig: "erledigt" };
+function syncFromBoard() {
+  var jobs; try { jobs = JSON.parse(localStorage.getItem(BOARD) || "null"); } catch (e) { jobs = null; }
+  if (!jobs) return;
+  var changed = false;
+  data.forEach(function (t) {
+    if (!t.auftrag) return;
+    var j = jobs.filter(function (a) { return a.id === t.auftrag; })[0]; if (!j) return;
+    var s = MAP[j.s]; if (!s || s === t.status) return;
+    t.status = s; changed = true;
+    var txt = s === "arbeit" ? "Elektro Brandt hat mit der Arbeit begonnen" : s === "erledigt" ? "Elektro Brandt meldet: erledigt" : "Elektro Brandt hat den Auftrag eingeplant";
+    t.verlauf.push({ t: new Date().toISOString(), text: txt });
+    logs.unshift({ cls: "in", text: stamp() + "  ← Webhook von Elektro Brandt\n" + JSON.stringify({ event: "auftrag.status", auftrag: j.id, meldung: t.id, status: j.s }, null, 2), res: "200 OK · Meldung " + t.id + " auf „" + stLabel(s) + "“ gesetzt" });
+  });
+  if (changed) { save(); render(); }
+}
+
+function assign(t, firma) {
+  var f = FIRMEN[firma]; t.firma = firma; t.status = "beauftragt";
+  if (f.api) {
+    var inbox; try { inbox = JSON.parse(localStorage.getItem(INBOX) || "[]"); } catch (e) { inbox = []; }
+    var payload = { meldung: t.id, titel: t.titel + " (" + t.raum + ")", kunde: "Hausverwaltung Nord", ort: t.whg.split(" · ")[0], wohnung: t.whg.split(" · ")[1] || "", beschreibung: t.text, dringend: t.dring, kategorie: t.kat, foto: !!t.foto };
+    inbox.push({ ticket: t.id, titel: payload.titel, ort: payload.ort, text: t.text + (payload.wohnung ? " Wohnung: " + payload.wohnung + "." : ""), prio: t.dring ? "dringend" : "normal", fotoUrl: t.foto || "" });
+    try { localStorage.setItem(INBOX, JSON.stringify(inbox)); } catch (e) {}
+    t.auftragPending = true;
+    t.verlauf.push({ t: new Date().toISOString(), text: "Elektro Brandt über Schnittstelle beauftragt" });
+    logs.unshift({ cls: "", text: stamp() + "  POST /api/auftraege → Elektro Brandt\n" + JSON.stringify(payload, null, 2), res: "202 Accepted · liegt im Eingang des Auftragsboards" });
+  } else {
+    t.verlauf.push({ t: new Date().toISOString(), text: firma + " per E-Mail beauftragt" });
+  }
+  save(); render();
+}
+/* Auftragsnummer übernehmen, sobald das Board die Meldung importiert hat */
+function linkAuftraege() {
+  var jobs; try { jobs = JSON.parse(localStorage.getItem(BOARD) || "null"); } catch (e) { jobs = null; }
+  if (!jobs) return;
+  var changed = false;
+  data.forEach(function (t) {
+    if (!t.auftragPending) return;
+    var j = jobs.filter(function (a) { return a.ticket === t.id; })[0]; if (!j) return;
+    t.auftrag = j.id; delete t.auftragPending; changed = true;
+    var last = t.verlauf[t.verlauf.length - 1]; last.text = "Elektro Brandt über Schnittstelle beauftragt (Auftrag #" + j.id + ")";
+  });
+  if (changed) save();
+}
+
+/* Darstellung */
+function steps(t) {
+  var i = STEPS.map(function (x) { return x[0]; }).indexOf(t.status), w = el("div");
+  var bar = el("div", "steps"), lab = el("div", "steps-l");
+  STEPS.forEach(function (s, k) { bar.appendChild(el("span", k <= i ? "on" : null)); lab.appendChild(el("span", null, s[1])); });
+  w.append(bar, lab); w.style.display = "grid"; w.style.gap = "4px"; return w;
+}
+function head(t) {
+  var h = el("div", "t-head");
+  if (t.foto) { var im = el("img"); im.src = t.foto; im.alt = ""; h.appendChild(im); } else h.appendChild(el("span", "noimg", t.kat.charAt(0)));
+  var d = el("div"); d.append(el("b", null, t.titel), el("small", null, t.id + " · " + t.kat + " · " + t.raum));
+  var p = el("div"); p.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;margin-top:4px";
+  p.appendChild(el("span", "pill st-" + t.status, stLabel(t.status).toUpperCase()));
+  if (t.dring && t.status !== "erledigt") p.appendChild(el("span", "pill dring", "DRINGEND"));
+  if (t.firma && FIRMEN[t.firma] && FIRMEN[t.firma].api) p.appendChild(el("span", "pill api", "API"));
+  d.appendChild(p); h.appendChild(d); return h;
+}
+function renderMieter() {
+  var k = document.getElementById("kat"); k.innerHTML = "";
+  KATS.forEach(function (n) { var b = el("button", "chip", n); b.type = "button"; b.setAttribute("aria-pressed", form.kat === n); b.onclick = function () { form.kat = n; renderMieter(); }; k.appendChild(b); });
+  var m = document.getElementById("meine"); m.innerHTML = "";
+  var mine = data.filter(function (t) { return t.mieter === "Familie Schäfer"; }).sort(function (a, b) { return b.id.localeCompare(a.id); });
+  if (!mine.length) m.appendChild(el("p", "empty", "Noch keine Meldungen."));
+  mine.forEach(function (t) {
+    var c = el("article", "ticket"); c.append(head(t), steps(t));
+    var last = t.verlauf[t.verlauf.length - 1], info = el("small", null, "Zuletzt: " + last.text + " · " + when(last.t)); info.style.color = "var(--muted)";
+    c.appendChild(info); m.appendChild(c);
+  });
+}
+function renderVerwaltung() {
+  var counts = { offen: 0, neu: 0, alle: data.length, erledigt: 0 };
+  data.forEach(function (t) { if (t.status !== "erledigt") counts.offen++; if (t.status === "neu") counts.neu++; if (t.status === "erledigt") counts.erledigt++; });
+  var tabs = document.getElementById("tabs"); tabs.innerHTML = "";
+  [["neu", "Neu"], ["offen", "Offen"], ["erledigt", "Erledigt"], ["alle", "Alle"]].forEach(function (x) {
+    var b = el("button", null, x[1] + " (" + counts[x[0]] + ")"); b.type = "button"; b.setAttribute("aria-pressed", filter === x[0]);
+    b.onclick = function () { filter = x[0]; render(); }; tabs.appendChild(b);
+  });
+  var api = data.filter(function (t) { return t.auftrag || t.auftragPending; }).length;
+  var kp = document.getElementById("kpis"); kp.innerHTML = "";
+  [["Neue Meldungen", counts.neu, counts.neu ? "warn" : ""], ["In Bearbeitung", counts.offen - counts.neu, ""], ["Erledigt", counts.erledigt, ""], ["Per Schnittstelle vergeben", api, ""]]
+    .forEach(function (x) { var d = el("div", "kpi " + x[2]); d.append(el("small", null, x[0]), el("b", null, String(x[1]))); kp.appendChild(d); });
+  var list = data.filter(function (t) { return filter === "alle" || (filter === "offen" ? t.status !== "erledigt" : t.status === filter); })
+    .sort(function (a, b) { return (b.dring - a.dring) || b.id.localeCompare(a.id); });
+  var l = document.getElementById("liste"); l.innerHTML = "";
+  if (!list.length) l.appendChild(el("p", "empty", "Keine Meldungen in dieser Ansicht."));
+  list.forEach(function (t) {
+    var b = el("button", "ticket" + (t.id === selected ? " sel" : "")); b.type = "button"; b.append(head(t));
+    var s = el("small", null, t.mieter + " · " + t.whg); s.style.color = "var(--muted)"; b.appendChild(s);
+    b.onclick = function () { selected = t.id; render(); if (window.innerWidth < 960) document.getElementById("detail").scrollIntoView({ behavior: "smooth", block: "start" }); };
+    l.appendChild(b);
+  });
+  renderDetail(); renderLog();
+}
+function renderDetail() {
+  var d = document.getElementById("detail"), t = byId(selected); d.innerHTML = "";
+  if (!t) { d.appendChild(el("p", "empty", "Wählen Sie links eine Meldung aus.")); return; }
+  var h = el("div"); h.style.cssText = "display:flex;justify-content:space-between;gap:10px;align-items:start;flex-wrap:wrap";
+  var hl = el("div"); hl.append(el("span", "label", t.id + " · " + t.kat), el("h2", null, t.titel)); hl.style.cssText = "display:grid;gap:4px";
+  h.append(hl, el("span", "pill st-" + t.status, stLabel(t.status).toUpperCase())); d.appendChild(h);
+  if (t.foto) { var im = el("img", "detail-photo"); im.src = t.foto; im.alt = "Foto der Mieterin zur Meldung"; d.appendChild(im); }
+  d.appendChild(el("p", null, t.text || "Keine Beschreibung."));
+  var dl = el("dl", "meta");
+  [["Mieter", t.mieter], ["Wohnung", t.whg], ["Raum", t.raum], ["Dringend", t.dring ? "Ja" : "Nein"], ["Vergeben an", t.firma ? t.firma + (t.auftrag ? " · Auftrag #" + t.auftrag : t.auftragPending ? " · wartet auf Import" : "") : "noch nicht vergeben"]]
+    .forEach(function (x) { dl.append(el("dt", null, x[0]), el("dd", null, x[1])); });
+  d.appendChild(dl);
+  if (t.status === "neu") {
+    var a = el("div", "assign"), lab = el("label", "f", "Handwerker beauftragen"); lab.htmlFor = "d-firma";
+    var sel = el("select"); sel.id = "d-firma";
+    Object.keys(FIRMEN).forEach(function (n) { var o = el("option", null, n + (FIRMEN[n].api ? " · Schnittstelle" : " · E-Mail")); o.value = n; if (FIRMEN[n].gewerk === t.kat) o.selected = true; sel.appendChild(o); });
+    lab.appendChild(sel); var b = el("button", "btn", "Beauftragen"); b.type = "button"; b.onclick = function () { assign(t, sel.value); };
+    a.append(lab, b); d.appendChild(a);
+  } else if (t.status !== "erledigt" && t.firma && !FIRMEN[t.firma].api) {
+    var e = el("button", "btn ghost", "Als erledigt markieren"); e.type = "button";
+    e.onclick = function () { t.status = "erledigt"; t.verlauf.push({ t: new Date().toISOString(), text: "Von der Verwaltung als erledigt markiert" }); save(); render(); };
+    var w = el("div"); w.appendChild(e); d.appendChild(w);
+  } else if (t.auftrag && t.status !== "erledigt") {
+    var hint = el("p", null, "Status kommt automatisch aus dem Auftragsboard von Elektro Brandt. "); hint.style.cssText = "color:var(--muted);font-size:.9rem";
+    var ln = el("a", null, "Dort ansehen →"); ln.href = "auftragsboard.html"; ln.style.color = "var(--green)"; hint.appendChild(ln); d.appendChild(hint);
+  }
+  d.appendChild(el("span", "label", "Verlauf"));
+  var v = el("div", "verlauf");
+  t.verlauf.slice().reverse().forEach(function (x) { var r = el("div", null, x.text); r.appendChild(el("small", null, when(x.t))); v.appendChild(r); });
+  d.appendChild(v);
+}
+function renderLog() {
+  var l = document.getElementById("log"); l.innerHTML = "";
+  if (!logs.length) { l.appendChild(el("pre", null, "Noch keine Übertragung in dieser Sitzung. Vergeben Sie eine Elektro-Meldung an Elektro Brandt.")); return; }
+  logs.forEach(function (x) { l.appendChild(el("pre", x.cls, x.text)); l.appendChild(el("pre", "ok", "← " + x.res)); });
+}
+function render() {
+  document.getElementById("v-mieter").hidden = role !== "mieter";
+  document.getElementById("v-verwaltung").hidden = role !== "verwaltung";
+  document.querySelectorAll(".roles button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.role === role); });
+  if (role === "mieter") renderMieter(); else renderVerwaltung();
+}
+
+/* Foto: verkleinern, damit es in den lokalen Speicher passt */
+function shrink(file, cb) {
+  var r = new FileReader();
+  r.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var s = Math.min(1, 900 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); cb(c.toDataURL("image/jpeg", 0.72));
+    };
+    img.onerror = function () { cb(""); };
+    img.src = r.result;
+  };
+  r.readAsDataURL(file);
+}
+function setFoto(file) {
+  if (!file || !/^image\//.test(file.type)) return;
+  document.getElementById("m-fname").textContent = "Wird geladen …";
+  shrink(file, function (url) {
+    form.foto = url; var p = document.getElementById("m-prev");
+    p.src = url; p.hidden = !url; document.getElementById("m-ico").style.display = url ? "none" : "";
+    document.getElementById("m-fname").textContent = url ? file.name : "Foto konnte nicht gelesen werden";
+  });
+}
+document.getElementById("m-foto").addEventListener("change", function () { setFoto(this.files[0]); });
+var drop = document.getElementById("drop");
+drop.addEventListener("dragover", function (e) { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", function () { drop.classList.remove("over"); });
+drop.addEventListener("drop", function (e) { e.preventDefault(); drop.classList.remove("over"); setFoto(e.dataTransfer.files[0]); });
+
+document.getElementById("melden").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var ti = document.getElementById("m-titel"), msg = document.getElementById("m-msg");
+  if (!ti.value.trim()) { msg.style.color = "var(--red)"; msg.textContent = "Bitte beschreiben Sie den Schaden kurz in einem Satz."; ti.focus(); return; }
+  var t = { id: nextId(), kat: form.kat, raum: document.getElementById("m-raum").value, titel: ti.value.trim(), text: document.getElementById("m-text").value.trim(), dring: document.getElementById("m-dring").checked, foto: form.foto, status: "neu", mieter: "Familie Schäfer", whg: "Bödekerstraße 00 · 2. OG links", verlauf: [{ t: new Date().toISOString(), text: "Meldung eingegangen" }] };
+  data.push(t); selected = t.id;
+  try { save(); } catch (err) {}
+  this.reset(); form.foto = ""; document.getElementById("m-prev").hidden = true; document.getElementById("m-ico").style.display = ""; document.getElementById("m-fname").textContent = "Foto hinzufügen";
+  msg.style.color = ""; msg.textContent = "Danke! Ihre Meldung " + t.id + " ist bei der Verwaltung angekommen. Wechseln Sie oben zur Verwaltung, um sie zu vergeben.";
+  render();
+});
+document.querySelectorAll(".roles button").forEach(function (b) { b.onclick = function () { role = b.dataset.role; location.hash = role; render(); }; });
+document.getElementById("reset").onclick = function () {
+  data = JSON.parse(JSON.stringify(SAMPLE)); logs = []; selected = "M-0412"; save();
+  try { localStorage.removeItem(INBOX); } catch (e) {}
+  render();
+};
+window.addEventListener("storage", function (e) { if (e.key === BOARD) { linkAuftraege(); syncFromBoard(); render(); } });
+window.addEventListener("focus", function () { linkAuftraege(); syncFromBoard(); render(); });
+window.addEventListener("pageshow", function () { linkAuftraege(); syncFromBoard(); render(); });
+window.addEventListener("hashchange", function () { var h = location.hash.slice(1); if (h === "mieter" || h === "verwaltung") { role = h; render(); } });
+
+data = load();
+var h0 = location.hash.slice(1); if (h0 === "mieter" || h0 === "verwaltung") role = h0;
+linkAuftraege(); syncFromBoard(); render();
+</script>
+</body>
+</html>

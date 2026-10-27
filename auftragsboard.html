@@ -140,6 +140,9 @@ input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line);
 .tbl small { display: block; color: var(--muted); }
 .tbl button { padding: 6px 10px; font-size: 0.8rem; white-space: nowrap; }
 .tbl .empty-row { color: var(--muted); text-align: center; padding: 18px; }
+.pill.portal { background: color-mix(in srgb, var(--blue) 15%, transparent); color: var(--blue); }
+.ticket-note { margin: 0; font-size: 0.85rem; color: var(--muted); background: var(--col); border-radius: 8px; padding: 8px 10px; }
+.ticket-note b { color: var(--ink); }
 .log { background: var(--log-bg); color: var(--log-ink); border-radius: 12px; padding: 14px 16px; font: 400 0.8rem/1.6 var(--mono); max-height: 300px; overflow: auto; }
 .log h2 { font: 600 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px; color: #8fb3c9; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .log h2 button { padding: 5px 9px; font-size: 0.7rem; background: transparent; color: #8fb3c9; border-color: #2b3d4b; }
@@ -261,7 +264,7 @@ var PHOTOS = {
   messen: ["img/elektro-messen.jpg", "30% 50%"], verteiler: ["img/elektro-verteiler.jpg", "50% 52%"],
   monteur: ["img/elektro-monteur.jpg", "50% 45%"], schuetze: ["img/elektro-schuetze.jpg", "50% 40%"]
 };
-var STUNDENSATZ = 68, UST = 0.19, KEY = "auftragsboard-demo-v5";
+var STUNDENSATZ = 68, UST = 0.19, KEY = "auftragsboard-demo-v6", INBOX = "auftragsboard-inbox";
 var COLS = [["offen", "Offen"], ["arbeit", "In Arbeit"], ["fertig", "Fertig"]];
 var CREW = { tm: "Tim Meyer", ak: "Anna Kowalski", js: "Jonas Schulz" };
 var SAMPLE = [
@@ -271,7 +274,7 @@ var SAMPLE = [
   { id: 1043, titel: "Stromausfall Küche", kunde: "Café Lister Meile", ort: "Lister Meile 00", std: 1.5, prio: "dringend", s: "arbeit", m: "ak", kat: "Störung", foto: "monteur", tag: 0, start: 7 },
   { id: 1045, titel: "Unterverteilung Neubau", kunde: "Bau GmbH Nord", ort: "Vahrenwalder Str. 00", std: 8, prio: "normal", s: "arbeit", m: "tm", kat: "Installation", foto: "verteiler", tag: 0, start: 7 },
   { id: 1039, titel: "LED-Umrüstung Büro", kunde: "Kanzlei Weber", ort: "Sedanstraße 00", std: 6, prio: "normal", s: "fertig", m: "js", kat: "Beleuchtung", sent: true, sentAt: -2, foto: "schuetze", tag: -2, start: 8 },
-  { id: 1040, titel: "Rauchmelder Mietshaus", kunde: "Hausverwaltung Nord", ort: "Bödekerstraße 00", std: 4, prio: "normal", s: "fertig", m: "ak", kat: "Sicherheit", foto: "verteiler", tag: -1, start: 9 }
+  { id: 1040, titel: "Rauchmelder Mietshaus", kunde: "Hausverwaltung Nord", ort: "Bödekerstraße 00", std: 4, prio: "normal", s: "fertig", m: "ak", kat: "Sicherheit", foto: "verteiler", tag: -1, start: 9, ticket: "M-0398" }
 ];
 var KUNDEN = {
   "Bäckerei Ahrens": { nr: "K-0112", kontakt: "Heike Ahrens", art: "Gewerbe", ort: "Lister Meile 00" },
@@ -312,6 +315,7 @@ function render() {
       var r1 = el("div", "row"); r1.append(el("span", "id", "#" + a.id), el("span", "pill cat", a.kat || "Auftrag"));
       if (a.prio === "dringend") r1.appendChild(el("span", "pill dring", "DRINGEND"));
       if (a.sent) r1.appendChild(el("span", "pill sent", "ABGERECHNET"));
+      if (a.ticket) r1.appendChild(el("span", "pill portal", "MIETERPORTAL"));
       card.appendChild(r1);
       card.appendChild(el("div", "t", a.titel));
       var r2 = el("div", "row"); r2.append(el("span", null, a.kunde + " · " + a.std + " Std."), av(a.m)); card.appendChild(r2);
@@ -325,11 +329,12 @@ function renderDetail() {
   var d = document.getElementById("detail"), a = byId(selected); d.innerHTML = "";
   if (!a) { d.appendChild(el("div", "body", "Wählen Sie einen Auftrag aus.")); return; }
   var ph = el("div", "photo"); ph.dataset.label = "Einsatzfoto · " + (a.kat || "Auftrag");
-  var src = PHOTOS[a.foto]; if (src) { ph.style.setProperty("--img", "url('" + src[0] + "')"); ph.style.backgroundPosition = src[1]; ph.classList.add("has-img"); }
+  var src = a.fotoUrl ? [a.fotoUrl, "50% 50%"] : PHOTOS[a.foto]; if (src) { ph.style.setProperty("--img", "url('" + src[0] + "')"); ph.style.backgroundPosition = src[1]; ph.classList.add("has-img"); }
   ph.innerHTML += '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>';
   var body = el("div", "body");
   body.appendChild(el("span", "id", "#" + a.id + " · " + COLS.filter(function (c) { return c[0] === a.s; })[0][1]));
   body.appendChild(el("h3", null, a.titel));
+  if (a.ticket) { var tk = el("p", "ticket-note"); tk.append(el("b", null, "Meldung " + a.ticket + " aus dem Mieterportal. "), a.text || ""); body.appendChild(tk); }
   var dl = el("dl");
   [["Kunde", a.kunde], ["Adresse", (a.ort || "–") + ", Hannover"], ["Monteur", CREW[a.m]], ["Aufwand", a.std + " Std. à " + STUNDENSATZ + " €"], ["Betrag netto", euro(a.std * STUNDENSATZ)]]
     .forEach(function (x) { dl.append(el("dt", null, x[0]), el("dd", null, x[1])); });
@@ -472,6 +477,25 @@ function showView() {
   document.getElementById("view-title").textContent = TITLES[v];
 }
 window.addEventListener("hashchange", showView);
+/* Schnittstelle: neue Aufträge aus dem Mieterportal übernehmen */
+function importInbox() {
+  var inbox; try { inbox = JSON.parse(localStorage.getItem(INBOX) || "[]"); } catch (e) { inbox = []; }
+  if (!inbox.length) return;
+  inbox.forEach(function (m) {
+    if (data.some(function (a) { return a.ticket === m.ticket; })) return;
+    var id = data.reduce(function (x, a) { return Math.max(x, a.id); }, 1000) + 1;
+    if (!kunden["Hausverwaltung Nord"]) kunden["Hausverwaltung Nord"] = JSON.parse(JSON.stringify(KUNDEN["Hausverwaltung Nord"]));
+    data.push({ id: id, titel: m.titel, kunde: "Hausverwaltung Nord", ort: m.ort, std: 2, prio: m.prio, s: "offen", m: "js", kat: "Störung", foto: "messen", fotoUrl: m.fotoUrl || "", tag: 1, start: 10, ticket: m.ticket, text: m.text });
+    selected = id;
+    var t = new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    logs.unshift({ req: t + "  ← POST /api/auftraege von Hausverwaltung Nord (Mieterportal)\n" + JSON.stringify({ meldung: m.ticket, titel: m.titel, ort: m.ort, dringend: m.prio === "dringend" }, null, 2), res: "201 Created · Auftrag #" + id + " angelegt, Monteur Jonas Schulz" });
+  });
+  try { localStorage.removeItem(INBOX); } catch (e) {}
+  save(); render();
+}
+window.addEventListener("storage", function (e) { if (e.key === INBOX && e.newValue) importInbox(); });
+window.addEventListener("focus", importInbox);
+window.addEventListener("pageshow", importInbox);
 document.getElementById("k-suche").addEventListener("input", renderKunden);
 /* Kundensuche im Auftragsformular */
 var combo = { input: document.getElementById("f-kunde"), list: document.getElementById("f-kunde-list"), items: [], act: -1 };
@@ -542,7 +566,7 @@ document.getElementById("k-form").addEventListener("submit", function (e) {
 
 document.getElementById("reset").onclick = function () { data = JSON.parse(JSON.stringify(SAMPLE)); kunden = JSON.parse(JSON.stringify(KUNDEN)); logs = []; selected = 1043; save(); renderKundenSelect(""); render(); };
 document.getElementById("today").textContent = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + " · Stundensatz " + STUNDENSATZ + " €";
-data = load(); kunden = loadKunden(); if (!byId(selected) && data[0]) selected = data[0].id; renderKundenSelect(""); render(); showView();
+data = load(); kunden = loadKunden(); if (!byId(selected) && data[0]) selected = data[0].id; renderKundenSelect(""); render(); showView(); importInbox();
 </script>
 </body>
 </html>

@@ -94,6 +94,10 @@ section { padding-block: 72px; }
 
 /* Portfolio */
 .cases { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.case.wide { grid-column: 1 / -1; display: grid; grid-template-columns: 1.25fr 1fr; }
+.case.wide .shot { border-bottom: 0; border-right: 1px solid var(--line); height: 100%; }
+.wide-body { display: flex; flex-direction: column; min-width: 0; }
+.case.wide .body { padding-top: 28px; }
 .case { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
 .case .shot { aspect-ratio: 16 / 10; max-width: 100%; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
 .case .shot { display: block; background: var(--line); }
@@ -153,7 +157,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 footer a { color: var(--muted); }
 
 @media (max-width: 860px) {
-  .hero .wrap, .band .wrap, .contact, .cases { grid-template-columns: 1fr; }
+  .hero .wrap, .band .wrap, .contact, .cases, .case.wide { grid-template-columns: 1fr; }
+  .case.wide .shot { border-right: 0; border-bottom: 1px solid var(--line); height: auto; }
   .steps { grid-template-columns: 1fr 1fr; }
   .price-row { grid-template-columns: 1fr; gap: 6px; }
   .price { text-align: left; }
@@ -259,10 +264,22 @@ footer a { color: var(--muted); }
     <div class="wrap">
       <div class="section-head">
         <span class="eyebrow">Portfolio</span>
-        <h2>Zwei Projekte zum Ausprobieren</h2>
-        <p>Beide Demos laufen im Browser. Klicken Sie sich durch, so wie es Ihre Kunden später tun würden.</p>
+        <h2>Drei Projekte zum Ausprobieren</h2>
+        <p>Alle Demos laufen im Browser. Klicken Sie sich durch, so wie es Ihre Kunden später tun würden.</p>
       </div>
       <div class="cases">
+        <article class="case wide">
+          <a class="shot" href="mieterportal.html" tabindex="-1" aria-hidden="true"><img src="img/vorschau-mieterportal.jpg" alt="" width="1152" height="720" loading="lazy"></a>
+          <div class="wide-body">
+          <div class="body">
+            <span class="eyebrow">App mit Schnittstelle · zwei Systeme verbunden</span>
+            <h3>Mieterportal Hausverwaltung Nord</h3>
+            <p>Mieter melden Schäden mit Foto, die Verwaltung vergibt sie an Handwerker. Elektro-Aufträge landen per Schnittstelle direkt im Auftragsboard von Elektro Brandt, und jeder Fortschritt dort kommt automatisch als Status zurück zur Mieterin.</p>
+            <div class="tags"><span class="tag">Rollen</span><span class="tag">Foto-Upload</span><span class="tag">REST/JSON</span><span class="tag">Webhooks</span><span class="tag">Status-Sync</span></div>
+          </div>
+          <div class="links"><a class="btn ghost" href="mieterportal.html">Demo öffnen</a></div>
+          </div>
+        </article>
         <article class="case">
           <a class="shot" href="salon-schnittpunkt.html" tabindex="-1" aria-hidden="true"><img src="img/vorschau-salon.jpg" alt="" width="1152" height="720" loading="lazy"></a>
           <div class="body">
@@ -284,7 +301,7 @@ footer a { color: var(--muted); }
           <div class="links"><a class="btn ghost" href="auftragsboard.html">Demo öffnen</a></div>
         </article>
       </div>
-      <p class="note">Beide Betriebe sind ausgedachte Beispiele, die Projekte selbst sind echt programmiert.</p>
+      <p class="note">Alle Betriebe sind ausgedachte Beispiele, die Projekte selbst sind echt programmiert.</p>
     </div>
   </section>
 
