@@ -40,6 +40,7 @@
   --code-bg: #0a1215; color-scheme: dark;
 }
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.6 var(--body); }
 .wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 h1, h2, h3 { font-family: var(--display); line-height: 1.1; text-wrap: balance; margin: 0; }
@@ -155,6 +156,8 @@ footer a { color: var(--muted); }
   .price { text-align: left; }
 }
 @media (max-width: 520px) {
+  .code { padding: 16px; font-size: 0.74rem; }
+  .code pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   .steps { grid-template-columns: 1fr; }
   nav { gap: 14px; }
   section { padding-block: 52px; }
