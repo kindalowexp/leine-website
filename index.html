@@ -96,6 +96,9 @@ section { padding-block: 72px; }
 .cases { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
 .case { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
 .case .shot { aspect-ratio: 16 / 10; max-width: 100%; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+.case .shot { display: block; background: var(--line); }
+.case .shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; transition: transform .4s ease; }
+.case:hover .shot img { transform: scale(1.03); }
 .case .body { padding: 24px; display: grid; gap: 12px; flex: 1; align-content: start; }
 .case .body p { color: var(--muted); }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -256,10 +259,7 @@ footer a { color: var(--muted); }
       </div>
       <div class="cases">
         <article class="case">
-          <div class="shot shot-salon" aria-hidden="true">
-            <div class="l"><b>Salon Schnittpunkt</b><i></i><i></i><u></u></div>
-            <div class="r"><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
+          <a class="shot" href="salon-schnittpunkt.html" tabindex="-1" aria-hidden="true"><img src="img/vorschau-salon.jpg" alt="" width="1152" height="720" loading="lazy"></a>
           <div class="body">
             <span class="eyebrow">Website mit Terminbuchung</span>
             <h3>Salon Schnittpunkt, Linden</h3>
@@ -269,11 +269,7 @@ footer a { color: var(--muted); }
           <div class="links"><a class="btn ghost" href="salon-schnittpunkt.html">Demo öffnen</a></div>
         </article>
         <article class="case">
-          <div class="shot shot-board" aria-hidden="true">
-            <div class="col"><b>OFFEN</b><span></span><span></span></div>
-            <div class="col"><b>IN ARBEIT</b><span class="w"></span></div>
-            <div class="col"><b>FERTIG</b><span class="d"></span><span class="d"></span></div>
-          </div>
+          <a class="shot" href="auftragsboard.html" tabindex="-1" aria-hidden="true"><img src="img/vorschau-board.jpg" alt="" width="1152" height="720" loading="lazy"></a>
           <div class="body">
             <span class="eyebrow">Web-App mit Schnittstelle</span>
             <h3>Auftragsboard Elektro Brandt</h3>
